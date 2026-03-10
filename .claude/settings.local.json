@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:127.0.0.1)",
+      "Bash(python -c \"from ui.main_window import MainWindow; from ui.api_client import ApiClient; from ui.instructors_page import InstructorsPage; from ui.instructor_card import InstructorCard; print\\('All imports OK'\\)\")",
+      "Bash(python3 -c \"from PyQt6.QtNetwork import QSslSocket; print\\(dir\\(QSslSocket\\)\\)\" 2>/dev/null | tr ',' '\\\\n' | grep -i verify)",
+      "Bash(python3 -c \"import base64; print\\(base64.b64encode\\('admin:password'.encode\\(\\)\\).decode\\(\\)\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -u admin:password http://127.0.0.1:2000/api/v1/internal/instructors 2>&1)",
+      "WebFetch(domain:masterly-api.the-nebula.tech)",
+      "Bash(python3 -c \"from ui.main_window import MainWindow; print\\('OK'\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -u admin:password https://masterly-api.the-nebula.tech/api/v1/internal/instructors 2>&1)",
+      "Bash(python3 -c \"\nfrom urllib.request import Request, urlopen\nimport base64\nurl = 'https://masterly-api.the-nebula.tech/api/v1/internal/instructors'\ncred = base64.b64encode\\(b'admin:password'\\).decode\\(\\)\nreq = Request\\(url\\)\nreq.add_header\\('Authorization', f'Basic {cred}'\\)\nresp = urlopen\\(req\\)\nprint\\(resp.status\\)\n\" 2>&1)"
+    ]
+  }
+}

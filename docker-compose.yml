@@ -1,0 +1,40 @@
+services:
+  r2-uploader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: r2-uploader-dev
+    
+    # Pass display for GUI (Linux host)
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_QPA_PLATFORM=${QT_QPA_PLATFORM:-xcb}
+      # R2 credentials (set in .env file)
+      - R2_ENDPOINT_URL=${R2_ENDPOINT_URL}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+      # Claude Code auth (set in .env file)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    
+    volumes:
+      # Mount source code for live development
+      - .:/app
+      # Mount X11 socket for GUI display (Linux)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Persist Claude Code config between restarts
+      - claude-config:/root/.claude
+      # Mount a folder for files to upload
+      - ${UPLOAD_DIR:-./uploads}:/data/uploads
+      # Output folder for converted files
+      - ${OUTPUT_DIR:-./output}:/data/output
+
+    # Keep container running for interactive dev
+    stdin_open: true
+    tty: true
+
+    # Use host network for easier GUI forwarding
+    network_mode: host
+
+volumes:
+  claude-config:

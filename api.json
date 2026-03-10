@@ -1,0 +1,4010 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "MasterlyBackend",
+        "version": "0.0.1"
+    },
+    "servers": [
+        {
+            "url": "http:\/\/127.0.0.1:2000\/api",
+            "description": "Local"
+        },
+        {
+            "url": "https:\/\/masterly-api.the-nebula.tech\/api",
+            "description": "Dev"
+        },
+        {
+            "url": "https:\/\/api-staging.masterlyiq.com\/api",
+            "description": "Staging"
+        },
+        {
+            "url": "https:\/\/api.masterlyiq.com\/api",
+            "description": "Prod"
+        }
+    ],
+    "tags": [
+        {
+            "name": "General Authentication"
+        },
+        {
+            "name": "Learner Authentication"
+        },
+        {
+            "name": "Learner Profile"
+        },
+        {
+            "name": "Learner Favorites"
+        },
+        {
+            "name": "Learner Lessons"
+        },
+        {
+            "name": "Learner Course Interactions"
+        },
+        {
+            "name": "Learner Courses"
+        },
+        {
+            "name": "Learner Orders"
+        },
+        {
+            "name": "Learner Notifications"
+        },
+        {
+            "name": "Learner Quizzes"
+        },
+        {
+            "name": "Learner Quiz Attempts"
+        },
+        {
+            "name": "Learner Cities"
+        },
+        {
+            "name": "Learner Instructors"
+        },
+        {
+            "name": "Learner Categories"
+        },
+        {
+            "name": "Learner Textual Resources"
+        }
+    ],
+    "security": [
+        {
+            "http": []
+        }
+    ],
+    "paths": {
+        "\/v1\/auth\/logout": {
+            "post": {
+                "operationId": "logout",
+                "tags": [
+                    "General Authentication"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        204
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/auth\/token": {
+            "post": {
+                "operationId": "learner.create-token",
+                "tags": [
+                    "Learner Authentication"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "userExisted": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "token",
+                                                "userExisted"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "424": {
+                        "description": "Failed to authenticate with the provided token.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/auth\/user": {
+            "get": {
+                "operationId": "learner.get-user",
+                "tags": [
+                    "Learner Authentication"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/categories": {
+            "get": {
+                "operationId": "learner.categories.index",
+                "tags": [
+                    "Learner Categories"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[favorited]",
+                        "in": "query",
+                        "description": "Filter favorited courses",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/ListCategoriesCollection"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/city": {
+            "get": {
+                "operationId": "learner.city.index",
+                "tags": [
+                    "Learner Cities"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/ListCitiesCollection"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/cities": {
+            "get": {
+                "operationId": "learner.cities.index",
+                "tags": [
+                    "Learner Cities"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/ListCitiesCollection"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/interactions\/{lessonId}": {
+            "get": {
+                "operationId": "learner.interactions.index",
+                "tags": [
+                    "Learner Course Interactions"
+                ],
+                "parameters": [
+                    {
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`InteractionCollection`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/InteractionCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/interactions\/{lessonId}\/results": {
+            "get": {
+                "operationId": "learner.interactions.results",
+                "tags": [
+                    "Learner Course Interactions"
+                ],
+                "parameters": [
+                    {
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "results": {
+                                                    "type": "string"
+                                                },
+                                                "summary": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "totalInteractions": {
+                                                            "type": "string"
+                                                        },
+                                                        "attemptedCount": {
+                                                            "type": "integer",
+                                                            "enum": [
+                                                                0
+                                                            ]
+                                                        },
+                                                        "averageScore": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "number"
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "enum": [
+                                                                        0
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "completionPercentage": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "number"
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "enum": [
+                                                                        0
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "totalInteractions",
+                                                        "attemptedCount",
+                                                        "averageScore",
+                                                        "completionPercentage"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "results",
+                                                "summary"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/interactions\/{interactionId}\/submit": {
+            "post": {
+                "operationId": "learner.interactions.submit",
+                "tags": [
+                    "Learner Course Interactions"
+                ],
+                "parameters": [
+                    {
+                        "name": "interactionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/SubmitInteractionAnswerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/LearnerInteractionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses\/{slug}\/enrollment-status": {
+            "get": {
+                "operationId": "learner.courses.enrollment-status",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "isEnrolled": {
+                                                    "type": "boolean"
+                                                },
+                                                "isExpired": {
+                                                    "type": "string"
+                                                },
+                                                "expiresAt": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "isEnrolled",
+                                                "isExpired",
+                                                "expiresAt"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "The requested course could not be found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses\/{slug}\/enroll": {
+            "post": {
+                "operationId": "learner.courses.enroll",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/EnrollInCourseRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/EnrollInCourseResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "description": "You are already enrolled in this course.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The requested course could not be found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses": {
+            "get": {
+                "operationId": "learner.courses.index",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "filter[instructor-slug]",
+                        "in": "query",
+                        "description": "Filter courses by instructor slug (exact match).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "john-doe"
+                    },
+                    {
+                        "name": "filter[grade]",
+                        "in": "query",
+                        "description": "Filter courses by grade (exact match).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[title]",
+                        "in": "query",
+                        "description": "Filter courses by title (partial match).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[categoryId]",
+                        "in": "query",
+                        "description": "Filter courses by category",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "filter[enrolled]",
+                        "in": "query",
+                        "description": "Filter to enrolled courses only (requires authentication).",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "filter[favorited]",
+                        "in": "query",
+                        "description": "Filter to favorited courses only (requires authentication).",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ListCoursesResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/ListCoursesCollection"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses\/{slug}": {
+            "get": {
+                "operationId": "learner.courses.show",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/ShowCourseResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses\/{slug}\/ratings": {
+            "get": {
+                "operationId": "learner.courses.ratings",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `GetCourseRatingsResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/GetCourseRatingsCollection"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "404": {
+                        "description": "Course not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses\/{slug}\/resources": {
+            "get": {
+                "operationId": "learner.courses.resources",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`GetCourseResourcesCollection`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/GetCourseResourcesCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/courses\/{slug}\/announcements": {
+            "get": {
+                "operationId": "learner.courses.announcements",
+                "tags": [
+                    "Learner Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/GetCourseAnnouncementsCollection"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "404": {
+                        "description": "Course not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/favorites\/toggle": {
+            "post": {
+                "operationId": "learner.favorites.toggle",
+                "tags": [
+                    "Learner Favorites"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/ToggleFavoriteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "isFavorited": {
+                                                    "type": "string"
+                                                },
+                                                "favoritesCount": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "isFavorited",
+                                                "favoritesCount"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "400": {
+                        "description": "The favoritable type must be either course or category.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The requested resource could not be found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/instructors": {
+            "get": {
+                "operationId": "learner.instructors.index",
+                "tags": [
+                    "Learner Instructors"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[name]",
+                        "in": "query",
+                        "description": "Filter instructors by display name (partial match, case-insensitive).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[slug]",
+                        "in": "query",
+                        "description": "Filter instructors by slug (exact match).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "john-doe"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ListInstructorResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/ListInstructorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/instructors\/{slug}": {
+            "get": {
+                "operationId": "learner.instructors.show",
+                "tags": [
+                    "Learner Instructors"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ShowInstructorResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/ShowInstructorResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Instructor not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/lessons\/{lesson}\/progress": {
+            "post": {
+                "operationId": "learner.lessons.update-progress",
+                "tags": [
+                    "Learner Lessons"
+                ],
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateLessonProgressRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "progressInSeconds": {
+                                                    "type": "integer"
+                                                },
+                                                "isCompleted": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "progressInSeconds",
+                                                "isCompleted"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "404": {
+                        "description": "Lesson not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/notifications": {
+            "get": {
+                "operationId": "learner.notifications.index",
+                "tags": [
+                    "Learner Notifications"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `NotificationResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/NotificationCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/notifications\/{notification}\/read": {
+            "patch": {
+                "operationId": "learner.notifications.mark-as-read",
+                "tags": [
+                    "Learner Notifications"
+                ],
+                "parameters": [
+                    {
+                        "name": "notification",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/orders": {
+            "get": {
+                "operationId": "learner.orders.index",
+                "tags": [
+                    "Learner Orders"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "filter[course-name]",
+                        "in": "query",
+                        "description": "Filter orders by course name (partial match).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[instructor-name]",
+                        "in": "query",
+                        "description": "Filter orders by instructor name (partial match).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `OrderHistoryResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/OrderHistoryCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/orders\/{uuid}": {
+            "get": {
+                "operationId": "learner.orders.show",
+                "tags": [
+                    "Learner Orders"
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/OrderHistoryShowResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Order not found.",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/stats": {
+            "get": {
+                "operationId": "learner.stats",
+                "tags": [
+                    "Learner Profile"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enrolledCourses": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                },
+                                                "hoursWatched": {
+                                                    "type": "number"
+                                                },
+                                                "lessonsWatched": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "enrolledCourses",
+                                                "hoursWatched",
+                                                "lessonsWatched"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/language": {
+            "post": {
+                "operationId": "learner.set-learner-language",
+                "tags": [
+                    "Learner Profile"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/SetLearnerLanguageRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/preferences": {
+            "post": {
+                "operationId": "learner.save-preferences",
+                "tags": [
+                    "Learner Profile"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#\/components\/schemas\/SavePreferencesRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "preferences": {
+                                                "type": "array",
+                                                "description": "Object containing preference keys and their boolean values. Valid keys: PlayAudioInBackground, AutoPlayNextLecture.",
+                                                "example": {
+                                                    "PlayAudioInBackground": true,
+                                                    "AutoPlayNextLecture": false
+                                                },
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1
+                                            }
+                                        },
+                                        "required": [
+                                            "preferences"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/profile": {
+            "patch": {
+                "operationId": "learner.update-profile",
+                "tags": [
+                    "Learner Profile"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart\/form-data": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateProfileRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/quiz-attempts\/{attemptId}": {
+            "get": {
+                "operationId": "learner.quiz-attempts.show",
+                "tags": [
+                    "Learner Quiz Attempts"
+                ],
+                "parameters": [
+                    {
+                        "name": "attemptId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/QuizAttemptDetailResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/quiz-attempts\/{attemptId}\/submit": {
+            "post": {
+                "operationId": "learner.quiz-attempts.submit",
+                "tags": [
+                    "Learner Quiz Attempts"
+                ],
+                "parameters": [
+                    {
+                        "name": "attemptId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/SubmitQuizAttemptRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/QuizAttemptDetailResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/quizzes": {
+            "get": {
+                "operationId": "learner.quizzes.index",
+                "tags": [
+                    "Learner Quizzes"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[courseSlug]",
+                        "in": "query",
+                        "description": "Filter quizzes by course slug",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[categoryId]",
+                        "in": "query",
+                        "description": "Filter quizzes by Category Id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`QuizCollection`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/QuizCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/quizzes\/{slug}\/leaderboard": {
+            "get": {
+                "operationId": "learner.quizzes.leaderboard",
+                "tags": [
+                    "Learner Quizzes"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `QuizLeaderboardResource`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/QuizLeaderboardCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/quizzes\/{slug}": {
+            "get": {
+                "operationId": "learner.quizzes.show",
+                "tags": [
+                    "Learner Quizzes"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/QuizResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/quizzes\/{slug}\/start": {
+            "post": {
+                "operationId": "learner.quizzes.start",
+                "tags": [
+                    "Learner Quizzes"
+                ],
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/QuizAttemptDetailResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/learner\/textual-resources": {
+            "get": {
+                "operationId": "learner.textual-resources.show",
+                "tags": [
+                    "Learner Textual Resources"
+                ],
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "terms",
+                                "privacy",
+                                "about-us"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/TextualResourceResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Textual resource not found."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            }
+        },
+        "\/v1\/callback\/first-iraqi-bank": {
+            "post": {
+                "operationId": "callback.first-iraqi-bank",
+                "tags": [
+                    "Callback"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    }
+                }
+            }
+        },
+        "\/v1\/internal\/instructors": {
+            "get": {
+                "operationId": "internal.instructors.index",
+                "tags": [
+                    "InternalVideo"
+                ],
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "display_name": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    },
+                                                    "photo_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "courses_count": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "display_name",
+                                                    "photo_url",
+                                                    "courses_count"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/v1\/internal\/instructors\/{instructor}\/courses": {
+            "get": {
+                "operationId": "internal.instructors.courses",
+                "tags": [
+                    "InternalVideo"
+                ],
+                "parameters": [
+                    {
+                        "name": "instructor",
+                        "in": "path",
+                        "required": true,
+                        "description": "The instructor ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "title": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    },
+                                                    "slug": {
+                                                        "type": "string"
+                                                    },
+                                                    "thumbnail_url": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "lessons_count": {
+                                                        "type": "string"
+                                                    },
+                                                    "storage_path": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "title",
+                                                    "slug",
+                                                    "thumbnail_url",
+                                                    "lessons_count",
+                                                    "storage_path"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#\/components\/responses\/ModelNotFoundException"
+                    }
+                }
+            }
+        },
+        "\/v1\/internal\/courses\/{course}": {
+            "get": {
+                "operationId": "internal.courses.show",
+                "tags": [
+                    "InternalVideo"
+                ],
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "description": "The course ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "slug": {
+                                                    "type": "string"
+                                                },
+                                                "storage_path": {
+                                                    "type": "string"
+                                                },
+                                                "lesson_groups": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "title": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            },
+                                                            "position": {
+                                                                "type": "integer"
+                                                            },
+                                                            "lessons": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "position": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "videos": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "id": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "quality": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "filename": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "storage_path": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "quality",
+                                                                                    "filename",
+                                                                                    "storage_path"
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        "expected_qualities": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "title",
+                                                                        "position",
+                                                                        "videos",
+                                                                        "expected_qualities"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "title",
+                                                            "position",
+                                                            "lessons"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "title",
+                                                "slug",
+                                                "storage_path",
+                                                "lesson_groups"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#\/components\/responses\/ModelNotFoundException"
+                    }
+                }
+            }
+        },
+        "\/v1\/metadata": {
+            "get": {
+                "operationId": "metadata.show",
+                "tags": [
+                    "Metadata"
+                ],
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "http": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "CourseAnnouncementResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "content",
+                    "createdAt"
+                ],
+                "title": "CourseAnnouncementResource"
+            },
+            "CourseResourceResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "downloadUrl": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "downloadUrl"
+                ],
+                "title": "CourseResourceResource"
+            },
+            "CreateTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "maxLength": 6000
+                    },
+                    "provider": {
+                        "type": "string",
+                        "enum": [
+                            "google",
+                            "apple"
+                        ],
+                        "maxLength": 255
+                    },
+                    "device": {
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "app"
+                        ]
+                    }
+                },
+                "required": [
+                    "token",
+                    "provider",
+                    "device"
+                ],
+                "title": "CreateTokenRequest"
+            },
+            "EnrollInCourseRequest": {
+                "type": "object",
+                "properties": {
+                    "paymentMethod": {
+                        "$ref": "#\/components\/schemas\/PaymentMethod"
+                    }
+                },
+                "required": [
+                    "paymentMethod"
+                ],
+                "title": "EnrollInCourseRequest"
+            },
+            "EnrollInCourseResource": {
+                "type": "object",
+                "properties": {
+                    "orderUuid": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "paymentData": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "readableCode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "qrCode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "personalAppLink": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "readableCode",
+                            "qrCode",
+                            "personalAppLink"
+                        ]
+                    },
+                    "enrolled": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "orderUuid",
+                    "amount",
+                    "status",
+                    "paymentData",
+                    "enrolled"
+                ],
+                "title": "EnrollInCourseResource"
+            },
+            "GetCourseAnnouncementsCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/CourseAnnouncementResource"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "GetCourseAnnouncementsCollection"
+            },
+            "GetCourseRatingsCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "GetCourseRatingsCollection"
+            },
+            "GetCourseResourcesCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/CourseResourceResource"
+                        }
+                    }
+                },
+                "required": [
+                    "data"
+                ],
+                "title": "GetCourseResourcesCollection"
+            },
+            "InteractionCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/InteractionResource"
+                        }
+                    }
+                },
+                "required": [
+                    "data"
+                ],
+                "title": "InteractionCollection"
+            },
+            "InteractionResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "integer"
+                    },
+                    "question": {
+                        "type": "string"
+                    },
+                    "imageUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "hasAnswered": {
+                        "type": "boolean"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "key": {
+                                    "type": "string"
+                                },
+                                "text": {
+                                    "type": "string"
+                                },
+                                "imageUrl": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "key",
+                                "text",
+                                "imageUrl"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "timestamp",
+                    "question",
+                    "imageUrl",
+                    "hasAnswered"
+                ],
+                "title": "InteractionResource"
+            },
+            "LearnerInteractionResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "interactionId": {
+                        "type": "integer"
+                    },
+                    "selectedOptionIds": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "isCorrect": {
+                        "type": "boolean"
+                    },
+                    "score": {
+                        "type": "number"
+                    },
+                    "submittedAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "key": {
+                                    "type": "string"
+                                },
+                                "text": {
+                                    "type": "string"
+                                },
+                                "imageUrl": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "isCorrect": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "key",
+                                "text",
+                                "imageUrl",
+                                "isCorrect"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "interactionId",
+                    "isCorrect",
+                    "score",
+                    "submittedAt"
+                ],
+                "title": "LearnerInteractionResource"
+            },
+            "ListCategoriesCollection": {
+                "type": "array",
+                "items": {
+                    "$ref": "#\/components\/schemas\/ListCategoriesResource"
+                },
+                "title": "ListCategoriesCollection"
+            },
+            "ListCategoriesResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "string"
+                    },
+                    "instructors": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "icon",
+                    "name",
+                    "position",
+                    "instructors"
+                ],
+                "title": "ListCategoriesResource"
+            },
+            "ListCitiesCollection": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "title": "ListCitiesCollection"
+            },
+            "ListCoursesCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "ListCoursesCollection"
+            },
+            "ListInstructorCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "ListInstructorCollection"
+            },
+            "NotificationCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/NotificationResource"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "NotificationCollection"
+            },
+            "NotificationResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "string"
+                    },
+                    "readAt": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "title",
+                    "message",
+                    "data",
+                    "readAt",
+                    "createdAt"
+                ],
+                "title": "NotificationResource"
+            },
+            "OrderHistoryCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/OrderHistoryResource"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "OrderHistoryCollection"
+            },
+            "OrderHistoryResource": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string"
+                    },
+                    "course": {
+                        "type": "object",
+                        "properties": {
+                            "slug": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "thumbnail": {
+                                "type": "string"
+                            },
+                            "instructor": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "fullName": {
+                                        "type": "string"
+                                    },
+                                    "avatar": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "fullName",
+                                    "avatar"
+                                ]
+                            },
+                            "price": {
+                                "type": "string"
+                            },
+                            "grade": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "slug",
+                            "title",
+                            "thumbnail",
+                            "instructor",
+                            "price",
+                            "grade"
+                        ]
+                    },
+                    "purchasedAt": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string"
+                    },
+                    "paymentMethod": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "uuid",
+                    "purchasedAt",
+                    "price"
+                ],
+                "title": "OrderHistoryResource"
+            },
+            "OrderHistoryShowResource": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string"
+                    },
+                    "course": {
+                        "type": "object",
+                        "properties": {
+                            "slug": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "thumbnail": {
+                                "type": "string"
+                            },
+                            "instructor": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "fullName": {
+                                        "type": "string"
+                                    },
+                                    "avatar": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "fullName",
+                                    "avatar"
+                                ]
+                            },
+                            "price": {
+                                "type": "string"
+                            },
+                            "grade": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "slug",
+                            "title",
+                            "thumbnail",
+                            "instructor",
+                            "price",
+                            "grade"
+                        ]
+                    },
+                    "purchasedAt": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string"
+                    },
+                    "paymentMethod": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "uuid",
+                    "purchasedAt",
+                    "price"
+                ],
+                "title": "OrderHistoryShowResource"
+            },
+            "PaymentMethod": {
+                "type": "string",
+                "enum": [
+                    "fib"
+                ],
+                "title": "PaymentMethod"
+            },
+            "QuizAttemptDetailResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "quiz": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "slug": {
+                                "type": "string"
+                            },
+                            "questionLimit": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "title",
+                            "description",
+                            "slug",
+                            "questionLimit"
+                        ]
+                    },
+                    "isCompleted": {
+                        "type": "boolean"
+                    },
+                    "score": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "progress": {
+                        "type": "object",
+                        "properties": {
+                            "answered": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "currentScore": {
+                                "type": "number"
+                            }
+                        },
+                        "required": [
+                            "answered",
+                            "total",
+                            "currentScore"
+                        ]
+                    },
+                    "questions": {
+                        "type": "string"
+                    },
+                    "bestScore": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "attemptCount": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "quiz",
+                    "isCompleted",
+                    "score",
+                    "progress",
+                    "questions",
+                    "bestScore",
+                    "attemptCount"
+                ],
+                "title": "QuizAttemptDetailResource"
+            },
+            "QuizCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/QuizResource"
+                        }
+                    }
+                },
+                "required": [
+                    "data"
+                ],
+                "title": "QuizCollection"
+            },
+            "QuizLeaderboardCollection": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/QuizLeaderboardResource"
+                        }
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "firstItem": {
+                                "type": "string"
+                            },
+                            "lastItem": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "perPage": {
+                                "type": "string"
+                            },
+                            "lastPage": {
+                                "type": "string"
+                            },
+                            "totalPages": {
+                                "type": "string"
+                            },
+                            "currentPage": {
+                                "type": "string"
+                            },
+                            "isLastPage": {
+                                "type": "boolean"
+                            },
+                            "isFirstPage": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "firstItem",
+                            "lastItem",
+                            "total",
+                            "perPage",
+                            "lastPage",
+                            "totalPages",
+                            "currentPage",
+                            "isLastPage",
+                            "isFirstPage"
+                        ]
+                    }
+                },
+                "required": [
+                    "data",
+                    "meta"
+                ],
+                "title": "QuizLeaderboardCollection"
+            },
+            "QuizLeaderboardResource": {
+                "type": "object",
+                "properties": {
+                    "rank": {
+                        "type": "string"
+                    },
+                    "learner": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "avatarUrl": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "avatarUrl"
+                        ]
+                    },
+                    "bestScore": {
+                        "type": "number"
+                    },
+                    "attemptsCount": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "rank",
+                    "learner",
+                    "bestScore",
+                    "attemptsCount"
+                ],
+                "title": "QuizLeaderboardResource"
+            },
+            "QuizResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "description": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "questionLimit": {
+                        "type": "integer"
+                    },
+                    "bestScore": {
+                        "type": "string"
+                    },
+                    "attemptCount": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name"
+                        ]
+                    },
+                    "createdAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "slug",
+                    "questionLimit",
+                    "createdAt"
+                ],
+                "title": "QuizResource"
+            },
+            "SavePreferencesRequest": {
+                "type": "object",
+                "properties": {
+                    "preferences": {
+                        "type": "object"
+                    }
+                },
+                "title": "SavePreferencesRequest"
+            },
+            "SetLearnerLanguageRequest": {
+                "type": "object",
+                "properties": {
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "en",
+                            "ku",
+                            "ku-b",
+                            "ar"
+                        ]
+                    }
+                },
+                "required": [
+                    "language"
+                ],
+                "title": "SetLearnerLanguageRequest"
+            },
+            "ShowCourseResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "thumbnail": {
+                        "type": "string"
+                    },
+                    "instructor": {
+                        "type": "object",
+                        "properties": {
+                            "slug": {
+                                "type": "string"
+                            },
+                            "fullName": {
+                                "type": "string"
+                            },
+                            "avatar": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "slug",
+                            "fullName",
+                            "avatar"
+                        ]
+                    },
+                    "details": {
+                        "type": "object",
+                        "properties": {
+                            "enrolledStudents": {
+                                "type": "string"
+                            },
+                            "ratings": {
+                                "type": "string"
+                            },
+                            "averageRating": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "enrolledStudents",
+                            "ratings",
+                            "averageRating"
+                        ]
+                    },
+                    "overview": {
+                        "type": "object",
+                        "properties": {
+                            "durationInSeconds": {
+                                "type": "integer"
+                            },
+                            "numberOfLessons": {
+                                "type": "string"
+                            },
+                            "numberOfResources": {
+                                "type": "string"
+                            },
+                            "enrollmentEndsAt": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "durationInSeconds",
+                            "numberOfLessons",
+                            "numberOfResources",
+                            "enrollmentEndsAt"
+                        ]
+                    },
+                    "price": {
+                        "type": "string"
+                    },
+                    "isFavorited": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ]
+                    },
+                    "isEnrolled": {
+                        "type": "boolean"
+                    },
+                    "enrollmentExpiresAt": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "object",
+                        "properties": {
+                            "slug": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "slug",
+                            "name"
+                        ]
+                    },
+                    "lastWatchedLessonId": {},
+                    "progress": {
+                        "type": "object",
+                        "properties": {
+                            "watched": {
+                                "type": "string"
+                            },
+                            "total": {
+                                "type": "string"
+                            },
+                            "percentage": {
+                                "anyOf": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "enum": [
+                                            0
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "required": [
+                            "watched",
+                            "total",
+                            "percentage"
+                        ]
+                    },
+                    "lessonGroups": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "slug",
+                    "title",
+                    "description",
+                    "thumbnail",
+                    "details",
+                    "overview",
+                    "price",
+                    "isFavorited",
+                    "isEnrolled",
+                    "enrollmentExpiresAt",
+                    "lastWatchedLessonId",
+                    "progress"
+                ],
+                "title": "ShowCourseResource"
+            },
+            "ShowInstructorResource": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "fullName": {
+                        "type": "string"
+                    },
+                    "avatarUrl": {
+                        "type": "string"
+                    },
+                    "cover": {
+                        "type": "string"
+                    },
+                    "videoCover": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "rating": {
+                        "type": "string"
+                    },
+                    "students": {
+                        "type": "string"
+                    },
+                    "courses": {
+                        "type": "string"
+                    },
+                    "about": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "fullName",
+                    "avatarUrl",
+                    "cover",
+                    "videoCover",
+                    "category",
+                    "rating",
+                    "students",
+                    "courses",
+                    "about"
+                ],
+                "title": "ShowInstructorResource"
+            },
+            "SubmitInteractionAnswerRequest": {
+                "type": "object",
+                "properties": {
+                    "optionIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "optionIds"
+                ],
+                "title": "SubmitInteractionAnswerRequest"
+            },
+            "SubmitQuizAttemptRequest": {
+                "type": "object",
+                "properties": {
+                    "answers": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "questionId": {
+                                    "type": "integer"
+                                },
+                                "optionIds": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer"
+                                    },
+                                    "minItems": 1
+                                }
+                            },
+                            "required": [
+                                "questionId",
+                                "optionIds"
+                            ]
+                        },
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "answers"
+                ],
+                "title": "SubmitQuizAttemptRequest"
+            },
+            "TextualResourceResource": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "content"
+                ],
+                "title": "TextualResourceResource"
+            },
+            "ToggleFavoriteRequest": {
+                "type": "object",
+                "properties": {
+                    "favoritableType": {
+                        "type": "string",
+                        "enum": [
+                            "course",
+                            "category"
+                        ]
+                    },
+                    "favoritableId": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "favoritableType",
+                    "favoritableId"
+                ],
+                "title": "ToggleFavoriteRequest"
+            },
+            "UpdateLessonProgressRequest": {
+                "type": "object",
+                "properties": {
+                    "progress": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "progress"
+                ],
+                "title": "UpdateLessonProgressRequest"
+            },
+            "UpdateProfileRequest": {
+                "type": "object",
+                "properties": {
+                    "avatar": {
+                        "type": "string",
+                        "format": "binary",
+                        "contentMediaType": "application\/octet-stream",
+                        "maxLength": 2048
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "cityId": {
+                        "type": "integer"
+                    },
+                    "grade": {
+                        "type": "integer",
+                        "minimum": 9,
+                        "maximum": 12
+                    },
+                    "gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female"
+                        ],
+                        "maxLength": 255
+                    },
+                    "birthday": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "en",
+                            "ku",
+                            "ku-b",
+                            "ar"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "cityId",
+                    "grade",
+                    "gender",
+                    "birthday",
+                    "language"
+                ],
+                "title": "UpdateProfileRequest"
+            },
+            "UserResource": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "birthday": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "grade": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "gender": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "city": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name"
+                        ]
+                    },
+                    "avatarUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "preferences": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "email",
+                    "birthday",
+                    "grade",
+                    "gender",
+                    "city",
+                    "avatarUrl",
+                    "preferences"
+                ],
+                "title": "UserResource"
+            }
+        },
+        "responses": {
+            "AuthenticationException": {
+                "description": "Unauthenticated",
+                "content": {
+                    "application\/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ValidationException": {
+                "description": "Validation error",
+                "content": {
+                    "application\/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Errors overview."
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "A detailed description of each field that failed validation.",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "message",
+                                "errors"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application\/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
