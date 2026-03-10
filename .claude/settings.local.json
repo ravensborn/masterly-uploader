@@ -9,7 +9,8 @@
       "WebFetch(domain:masterly-api.the-nebula.tech)",
       "Bash(python3 -c \"from ui.main_window import MainWindow; print\\('OK'\\)\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" -u admin:password https://masterly-api.the-nebula.tech/api/v1/internal/instructors 2>&1)",
-      "Bash(python3 -c \"\nfrom urllib.request import Request, urlopen\nimport base64\nurl = 'https://masterly-api.the-nebula.tech/api/v1/internal/instructors'\ncred = base64.b64encode\\(b'admin:password'\\).decode\\(\\)\nreq = Request\\(url\\)\nreq.add_header\\('Authorization', f'Basic {cred}'\\)\nresp = urlopen\\(req\\)\nprint\\(resp.status\\)\n\" 2>&1)"
+      "Bash(python3 -c \"\nfrom urllib.request import Request, urlopen\nimport base64\nurl = 'https://masterly-api.the-nebula.tech/api/v1/internal/instructors'\ncred = base64.b64encode\\(b'admin:password'\\).decode\\(\\)\nreq = Request\\(url\\)\nreq.add_header\\('Authorization', f'Basic {cred}'\\)\nresp = urlopen\\(req\\)\nprint\\(resp.status\\)\n\" 2>&1)",
+      "Bash(python3 -c \"from ui.course_detail_page import CourseDetailPage, LessonItem; print\\('CourseDetailPage OK'\\); print\\('LessonItem has checkbox:', 'checkbox' in LessonItem.__init__.__code__.co_varnames\\)\")"
     ]
   }
 }
