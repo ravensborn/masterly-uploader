@@ -4,6 +4,7 @@ from PyQt6.QtCore import QSize
 from ui.api_client import ApiClient
 from ui.instructors_page import InstructorsPage
 from ui.courses_page import CoursesPage
+from ui.course_detail_page import CourseDetailPage
 
 
 class MainWindow(QMainWindow):
@@ -28,10 +29,16 @@ class MainWindow(QMainWindow):
         self.courses_page.course_selected.connect(self._on_course_selected)
         self.stack.addWidget(self.courses_page)
 
+        # Course detail page
+        self.detail_page = CourseDetailPage(self.api_client, self)
+        self.detail_page.back_requested.connect(self._show_courses)
+        self.stack.addWidget(self.detail_page)
+
         # Load initial data
         self.instructors_page.load()
 
     def _on_instructor_selected(self, instructor_id: int, name: str):
+        self._current_instructor = (instructor_id, name)
         self.courses_page.load(instructor_id, name)
         self.stack.setCurrentWidget(self.courses_page)
 
@@ -39,5 +46,8 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.instructors_page)
 
     def _on_course_selected(self, course_id: int, title: str):
-        # Placeholder — will navigate to course detail page next
-        print(f"Selected course: {title} (ID: {course_id})")
+        self.detail_page.load(course_id, title)
+        self.stack.setCurrentWidget(self.detail_page)
+
+    def _show_courses(self):
+        self.stack.setCurrentWidget(self.courses_page)

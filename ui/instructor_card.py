@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
-from PyQt6.QtGui import QPixmap, QCursor
+from PyQt6.QtGui import QPixmap, QCursor, QPainter, QPainterPath
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt6.QtCore import QUrl
@@ -105,8 +105,20 @@ class InstructorCard(QFrame):
                 x = (scaled.width() - 100) // 2
                 y = (scaled.height() - 100) // 2
                 cropped = scaled.copy(x, y, 100, 100)
-                self.photo_label.setPixmap(cropped)
-                self.photo_label.setStyleSheet("border-radius: 50px;")
+
+                # Make circular
+                rounded = QPixmap(100, 100)
+                rounded.fill(Qt.GlobalColor.transparent)
+                painter = QPainter(rounded)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                path = QPainterPath()
+                path.addEllipse(0, 0, 100, 100)
+                painter.setClipPath(path)
+                painter.drawPixmap(0, 0, cropped)
+                painter.end()
+
+                self.photo_label.setPixmap(rounded)
+                self.photo_label.setStyleSheet("background: transparent;")
         reply.deleteLater()
 
     def mousePressEvent(self, event):

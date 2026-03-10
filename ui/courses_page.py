@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
-from PyQt6.QtGui import QPixmap, QCursor, QColor
+from PyQt6.QtGui import QPixmap, QCursor, QColor, QPainter, QPainterPath, QBrush
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QScrollArea, QFrame, QPushButton,
@@ -104,19 +104,36 @@ class CourseCard(QFrame):
             pixmap = QPixmap()
             pixmap.loadFromData(reply.readAll())
             if not pixmap.isNull():
+                w, h = 240, 120
                 scaled = pixmap.scaled(
-                    QSize(280, 120),
+                    QSize(w, h),
                     Qt.AspectRatioMode.KeepAspectRatioByExpanding,
                     Qt.TransformationMode.SmoothTransformation,
                 )
-                x = (scaled.width() - 280) // 2
-                y = (scaled.height() - 120) // 2
-                cropped = scaled.copy(max(0, x), max(0, y), min(280, scaled.width()), 120)
-                self.thumb_label.setPixmap(cropped)
-                self.thumb_label.setStyleSheet("""
-                    border-top-left-radius: 16px;
-                    border-top-right-radius: 16px;
-                """)
+                x = (scaled.width() - w) // 2
+                y = (scaled.height() - h) // 2
+                cropped = scaled.copy(max(0, x), max(0, y), w, h)
+
+                # Round the top corners
+                rounded = QPixmap(w, h)
+                rounded.fill(Qt.GlobalColor.transparent)
+                painter = QPainter(rounded)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                path = QPainterPath()
+                radius = 16.0
+                path.moveTo(0, h)
+                path.lineTo(0, radius)
+                path.arcTo(0, 0, radius * 2, radius * 2, 180, -90)
+                path.lineTo(w - radius, 0)
+                path.arcTo(w - radius * 2, 0, radius * 2, radius * 2, 90, -90)
+                path.lineTo(w, h)
+                path.closeSubpath()
+                painter.setClipPath(path)
+                painter.drawPixmap(0, 0, cropped)
+                painter.end()
+
+                self.thumb_label.setPixmap(rounded)
+                self.thumb_label.setStyleSheet("background: transparent;")
         reply.deleteLater()
 
     def mousePressEvent(self, event):
