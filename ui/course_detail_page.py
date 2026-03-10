@@ -95,7 +95,7 @@ class LessonItem(QFrame):
 
     def _localized(self, value):
         if isinstance(value, dict):
-            return value.get("ar", value.get("en", str(value)))
+            return value.get("ku-b", value.get("ku", value.get("en", str(value))))
         if isinstance(value, list):
             return str(value[0]) if value else ""
         return str(value)
@@ -189,7 +189,7 @@ class LessonGroupWidget(QFrame):
 
     def _localized(self, value):
         if isinstance(value, dict):
-            return value.get("ar", value.get("en", str(value)))
+            return value.get("ku-b", value.get("ku", value.get("en", str(value))))
         if isinstance(value, list):
             return str(value[0]) if value else ""
         return str(value)
@@ -267,7 +267,7 @@ class CourseDetailPage(QWidget):
 
     def _localized(self, value):
         if isinstance(value, dict):
-            return value.get("ar", value.get("en", str(value)))
+            return value.get("ku-b", value.get("ku", value.get("en", str(value))))
         if isinstance(value, list):
             return str(value[0]) if value else ""
         return str(value)
@@ -321,13 +321,16 @@ class CourseDetailPage(QWidget):
 
     def _on_url_ready(self, url: str):
         self.status_label.hide()
-        # Try xdg-open (Linux), then fallback to Qt desktop services
-        if sys.platform == "linux":
+        # Open directly in VLC, fall back to mpv, then xdg-open
+        import shutil
+        if shutil.which("vlc"):
+            subprocess.Popen(["vlc", url])
+        elif shutil.which("mpv"):
+            subprocess.Popen(["mpv", url])
+        elif sys.platform == "linux":
             subprocess.Popen(["xdg-open", url])
         elif sys.platform == "darwin":
             subprocess.Popen(["open", url])
-        elif sys.platform == "win32":
-            subprocess.Popen(["start", url], shell=True)
         else:
             QDesktopServices.openUrl(QUrl(url))
 

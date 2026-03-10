@@ -25,7 +25,7 @@ class CourseCard(QFrame):
 
     def _localized(self, value):
         if isinstance(value, dict):
-            return value.get("ar", value.get("en", str(value)))
+            return value.get("ku-b", value.get("ku", value.get("en", str(value))))
         if isinstance(value, list):
             return str(value[0]) if value else ""
         return str(value)
