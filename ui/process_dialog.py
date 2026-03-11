@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QPushButton, QScrollArea, QFrame, QWidget, QGraphicsDropShadowEffect,
 )
 
-from ui.video_processor import ProcessingTask, ProcessingWorker
+from ui.video_processor import ProcessingTask, ProcessingWorker, get_encoder_label
 
 PROGRESS_STYLE = """
     QProgressBar {
@@ -145,9 +145,29 @@ class ProcessDialog(QDialog):
         layout.setSpacing(0)
 
         # Header
+        header_row = QHBoxLayout()
+        header_row.setSpacing(12)
+
         header = QLabel("Processing Videos")
         header.setStyleSheet("font-size: 22px; font-weight: 700; color: #0f172a; background: transparent;")
-        layout.addWidget(header)
+        header_row.addWidget(header)
+
+        encoder = get_encoder_label()
+        is_gpu = encoder != "CPU (libx264)"
+        self.encoder_badge = QLabel(encoder)
+        self.encoder_badge.setFixedHeight(26)
+        self.encoder_badge.setStyleSheet(f"""
+            font-size: 11px;
+            font-weight: 600;
+            color: {"#059669" if is_gpu else "#64748b"};
+            background: {"#ecfdf5" if is_gpu else "#f1f5f9"};
+            border-radius: 13px;
+            padding: 4px 12px;
+        """)
+        header_row.addWidget(self.encoder_badge)
+        header_row.addStretch()
+
+        layout.addLayout(header_row)
 
         layout.addSpacing(20)
 
@@ -229,8 +249,20 @@ class ProcessDialog(QDialog):
         self.worker = ProcessingWorker(self.tasks, self)
         self.worker.task_progress.connect(self._on_task_progress)
         self.worker.task_error.connect(self._on_task_error)
+        self.worker.encoder_fallback.connect(self._on_encoder_fallback)
         self.worker.all_done.connect(self._on_all_done)
         self.worker.start()
+
+    def _on_encoder_fallback(self):
+        self.encoder_badge.setText("CPU (libx264)")
+        self.encoder_badge.setStyleSheet("""
+            font-size: 11px;
+            font-weight: 600;
+            color: #d97706;
+            background: #fffbeb;
+            border-radius: 13px;
+            padding: 4px 12px;
+        """)
 
     def _on_task_progress(self, task_idx: int, quality: str, stage: str, pct: int):
         if 0 <= task_idx < len(self.task_rows):

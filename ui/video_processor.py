@@ -11,6 +11,34 @@ FFMPEG = shutil.which("ffmpeg") or "ffmpeg"
 FFPROBE = shutil.which("ffprobe") or "ffprobe"
 
 
+def _detect_hw_encoder() -> dict | None:
+    """Detect available GPU encoder. Returns encoder config dict or None."""
+    try:
+        result = subprocess.run(
+            [FFMPEG, "-encoders"], capture_output=True, text=True, timeout=5,
+        )
+        encoders = result.stdout
+    except Exception:
+        return None
+
+    # Prefer NVENC (NVIDIA), then AMF (AMD), then QSV (Intel)
+    if "h264_nvenc" in encoders:
+        return {"codec": "h264_nvenc", "hwaccel": "cuda", "label": "NVIDIA NVENC", "extra": ["-preset", "p4", "-cq", "23"]}
+    if "h264_amf" in encoders:
+        return {"codec": "h264_amf", "hwaccel": "auto", "label": "AMD AMF", "extra": ["-quality", "balanced", "-qp_i", "23", "-qp_p", "23"]}
+    if "h264_qsv" in encoders:
+        return {"codec": "h264_qsv", "hwaccel": "qsv", "label": "Intel Quick Sync", "extra": ["-preset", "medium", "-global_quality", "23"]}
+    return None
+
+
+_HW_ENCODER = _detect_hw_encoder()
+
+def get_encoder_label() -> str:
+    if _HW_ENCODER:
+        return _HW_ENCODER["label"]
+    return "CPU (libx264)"
+
+
 class ProcessingTask:
     def __init__(self, lesson_id: int, lesson_title: str, source_file: str,
                  course_storage_path: str, qualities: list[str]):
@@ -33,6 +61,8 @@ class ProcessingWorker(QThread):
     task_progress = Signal(int, str, str, int)
     # (task_index, quality, error_message)
     task_error = Signal(int, str, str)
+    # emitted when GPU fails and we fall back to CPU
+    encoder_fallback = Signal()
     # overall done
     all_done = Signal()
 
@@ -81,38 +111,20 @@ class ProcessingWorker(QThread):
 
         duration = self._get_duration(task.source_file)
 
-        cmd = [
-            FFMPEG, "-y", "-hwaccel", "none",
-            "-i", task.source_file,
-            "-vf", f"scale=-2:{height}",
-            "-c:v", "libx264", "-preset", "medium", "-crf", "23",
-            "-c:a", "aac", "-b:a", "128k",
-            output_path,
-        ]
+        # Try GPU encoding first, fall back to CPU
+        gpu_cmd = self._build_ffmpeg_cmd(task.source_file, height, output_path, use_gpu=True)
+        cpu_cmd = self._build_ffmpeg_cmd(task.source_file, height, output_path, use_gpu=False)
 
-        proc = subprocess.Popen(
-            cmd, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL,
-            universal_newlines=True,
-        )
+        returncode, error_detail = self._run_ffmpeg(gpu_cmd if gpu_cmd != cpu_cmd else cpu_cmd, task_idx, quality, duration)
 
-        stderr_lines = []
-        for line in proc.stderr:
-            stderr_lines.append(line)
-            if self._cancelled:
-                proc.kill()
-                return
-            match = re.search(r"time=(\d+):(\d+):(\d+)\.(\d+)", line)
-            if match and duration > 0:
-                h, m, s, cs = match.groups()
-                current = int(h) * 3600 + int(m) * 60 + int(s) + int(cs) / 100
-                pct = min(int(current / duration * 100), 99)
-                self.task_progress.emit(task_idx, quality, "encoding", pct)
+        # If GPU failed, retry with CPU
+        if returncode != 0 and gpu_cmd != cpu_cmd:
+            self.encoder_fallback.emit()
+            self.task_progress.emit(task_idx, quality, "encoding", 0)
+            returncode, error_detail = self._run_ffmpeg(cpu_cmd, task_idx, quality, duration)
 
-        proc.wait()
-        if proc.returncode != 0:
-            # Get the last few meaningful lines from stderr
-            error_detail = "".join(stderr_lines[-10:]).strip()
-            raise RuntimeError(f"ffmpeg exit code {proc.returncode}:\n{error_detail}")
+        if returncode != 0:
+            raise RuntimeError(f"ffmpeg exit code {returncode}:\n{error_detail}")
 
         self.task_progress.emit(task_idx, quality, "encoding", 100)
 
@@ -148,6 +160,49 @@ class ProcessingWorker(QThread):
             pass
 
         self.task_progress.emit(task_idx, quality, "done", 100)
+
+    def _build_ffmpeg_cmd(self, source: str, height: int, output: str, use_gpu: bool = True) -> list[str]:
+        if use_gpu and _HW_ENCODER:
+            hw = _HW_ENCODER
+            return [
+                FFMPEG, "-y", "-hwaccel", hw["hwaccel"],
+                "-i", source,
+                "-vf", f"scale=-2:{height}",
+                "-c:v", hw["codec"], *hw["extra"],
+                "-c:a", "aac", "-b:a", "128k",
+                output,
+            ]
+        return [
+            FFMPEG, "-y",
+            "-i", source,
+            "-vf", f"scale=-2:{height}",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "23",
+            "-c:a", "aac", "-b:a", "128k",
+            output,
+        ]
+
+    def _run_ffmpeg(self, cmd: list[str], task_idx: int, quality: str, duration: float) -> tuple[int, str]:
+        proc = subprocess.Popen(
+            cmd, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL,
+            universal_newlines=True,
+        )
+
+        stderr_lines = []
+        for line in proc.stderr:
+            stderr_lines.append(line)
+            if self._cancelled:
+                proc.kill()
+                return (-1, "Cancelled")
+            match = re.search(r"time=(\d+):(\d+):(\d+)\.(\d+)", line)
+            if match and duration > 0:
+                h, m, s, cs = match.groups()
+                current = int(h) * 3600 + int(m) * 60 + int(s) + int(cs) / 100
+                pct = min(int(current / duration * 100), 99)
+                self.task_progress.emit(task_idx, quality, "encoding", pct)
+
+        proc.wait()
+        error_detail = "".join(stderr_lines[-10:]).strip()
+        return (proc.returncode, error_detail)
 
     def _get_duration(self, filepath: str) -> float:
         try:
