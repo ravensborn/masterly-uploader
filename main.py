@@ -8,7 +8,7 @@ load_dotenv()
 
 from ui.main_window import MainWindow
 
-API_BASE = "https://masterly-api.the-nebula.tech/api"
+API_BASE = os.getenv("API_BASE_URL", "https://masterly-api.the-nebula.tech").rstrip("/") + "/api"
 
 STYLESHEET = """
 * {

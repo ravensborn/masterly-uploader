@@ -14,7 +14,8 @@
       "Bash(which pip3:*)",
       "Bash(pip3 install:*)",
       "Bash(which ffmpeg:*)",
-      "Bash(ffmpeg -encoders 2>/dev/null | grep -E \"h264_nvenc|h264_amf|h264_qsv|h264_vaapi\" || echo \"No HW encoders found in this env \\(check on your local machine\\)\")"
+      "Bash(ffmpeg -encoders 2>/dev/null | grep -E \"h264_nvenc|h264_amf|h264_qsv|h264_vaapi\" || echo \"No HW encoders found in this env \\(check on your local machine\\)\")",
+      "Bash(chmod 644 /app/.env.example)"
     ]
   }
 }

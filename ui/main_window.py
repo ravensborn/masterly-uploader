@@ -1,3 +1,5 @@
+import os
+
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from PySide6.QtCore import QSize
 
@@ -14,7 +16,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(QSize(900, 560))
         self.resize(1200, 760)
 
-        self.api_client = ApiClient(api_base, parent=self)
+        username = os.getenv("API_USERNAME", "admin")
+        password = os.getenv("API_PASSWORD", "password")
+        self.api_client = ApiClient(api_base, username=username, password=password, parent=self)
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
