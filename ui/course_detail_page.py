@@ -121,17 +121,6 @@ class LessonItem(QFrame):
         title_label.setWordWrap(True)
         layout.addWidget(title_label, stretch=1)
 
-        # Videos count badge
-        video_count = len(self.videos)
-        if video_count > 0:
-            badge = QLabel(f"{video_count} video{'s' if video_count != 1 else ''}")
-            badge.setStyleSheet("""
-                font-size: 11px; color: #64748b; background: #f1f5f9;
-                border-radius: 10px; padding: 3px 10px; font-weight: 500;
-            """)
-            badge.setFixedHeight(22)
-            layout.addWidget(badge)
-
         # Quality badges
         existing = {v.get("quality") for v in self.videos}
         for q in self.expected_qualities:
@@ -212,11 +201,6 @@ class LessonGroupWidget(QFrame):
         self.select_all_cb.setStyleSheet(CHECKBOX_STYLE)
         self.select_all_cb.stateChanged.connect(self._on_select_all)
         header_row.addWidget(self.select_all_cb)
-
-        position = group.get("position", 0)
-        pos_label = QLabel(f"Group {position}")
-        pos_label.setStyleSheet("font-size: 11px; color: #94a3b8; font-weight: 600; background: transparent; letter-spacing: 0.5px;")
-        header_row.addWidget(pos_label)
 
         title = _localized(group.get("title", ""))
         title_label = QLabel(title)

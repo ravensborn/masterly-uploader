@@ -101,26 +101,7 @@ class AssignDialog(QDialog):
         hint.setStyleSheet("font-size: 13px; color: #64748b; background: transparent;")
         layout.addWidget(hint)
 
-        layout.addSpacing(20)
-
-        # Bulk assign button
-        bulk_row = QHBoxLayout()
-        bulk_row.addStretch()
-        bulk_btn = QPushButton("Assign same file to all")
-        bulk_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        bulk_btn.setFixedHeight(34)
-        bulk_btn.setStyleSheet("""
-            QPushButton {
-                background: #eff6ff; border: none; border-radius: 8px;
-                color: #2563eb; font-size: 12px; font-weight: 600; padding: 0 18px;
-            }
-            QPushButton:hover { background: #dbeafe; }
-        """)
-        bulk_btn.clicked.connect(self._bulk_assign)
-        bulk_row.addWidget(bulk_btn)
-        layout.addLayout(bulk_row)
-
-        layout.addSpacing(16)
+        layout.addSpacing(24)
 
         # Scroll area for rows
         scroll = QScrollArea()
@@ -176,18 +157,6 @@ class AssignDialog(QDialog):
         btn_row.addWidget(self.start_btn)
 
         layout.addLayout(btn_row)
-
-    def _bulk_assign(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Video for all lessons", "",
-            "Video Files (*.mp4 *.mkv *.avi *.mov *.webm *.flv);;All Files (*)",
-        )
-        if file_path:
-            for row in self.rows:
-                row.file_path = file_path
-                row.file_label.setText(os.path.basename(file_path))
-                row.file_label.setStyleSheet("font-size: 12px; color: #059669; font-weight: 500; background: transparent;")
-                row.file_label.setToolTip(file_path)
 
     def _on_start(self):
         # Check all have files assigned
