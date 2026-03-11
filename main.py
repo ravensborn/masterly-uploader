@@ -12,11 +12,11 @@ API_BASE = "https://masterly-api.the-nebula.tech/api"
 
 STYLESHEET = """
 * {
-    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Inter", "SF Pro Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 QMainWindow {
-    background: #f0f2f5;
+    background: #f8fafc;
 }
 
 QScrollArea {
@@ -29,36 +29,69 @@ QScrollArea > QWidget > QWidget {
 }
 
 QScrollBar:vertical {
-    background: #f0f2f5;
-    width: 8px;
-    border-radius: 4px;
+    background: transparent;
+    width: 6px;
+    margin: 4px 0;
 }
 QScrollBar::handle:vertical {
-    background: #c0c0c0;
-    border-radius: 4px;
-    min-height: 30px;
+    background: #cbd5e1;
+    border-radius: 3px;
+    min-height: 40px;
 }
 QScrollBar::handle:vertical:hover {
-    background: #a0a0a0;
+    background: #94a3b8;
 }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     height: 0;
 }
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 6px;
+    margin: 0 4px;
+}
+QScrollBar::handle:horizontal {
+    background: #cbd5e1;
+    border-radius: 3px;
+    min-width: 40px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #94a3b8;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: transparent;
+}
 
 QLineEdit {
     padding: 10px 16px;
-    border: 1px solid #d0d5dd;
-    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
     font-size: 14px;
     background: #ffffff;
-    color: #1d2939;
+    color: #0f172a;
+    selection-background-color: #bfdbfe;
 }
 QLineEdit:focus {
-    border: 2px solid #1976d2;
+    border: 1.5px solid #3b82f6;
     background: #ffffff;
 }
 QLineEdit::placeholder {
-    color: #98a2b3;
+    color: #94a3b8;
+}
+
+QToolTip {
+    background: #1e293b;
+    color: #f1f5f9;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
 }
 """
 

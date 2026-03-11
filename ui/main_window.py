@@ -11,8 +11,8 @@ class MainWindow(QMainWindow):
     def __init__(self, api_base: str, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Video Course Manager")
-        self.setMinimumSize(QSize(800, 500))
-        self.resize(1100, 700)
+        self.setMinimumSize(QSize(900, 560))
+        self.resize(1200, 760)
 
         self.api_client = ApiClient(api_base, parent=self)
         self.stack = QStackedWidget()

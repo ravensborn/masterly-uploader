@@ -9,6 +9,23 @@ from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRe
 
 from ui.flow_layout import FlowLayout
 
+BACK_BTN_STYLE = """
+    QPushButton {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 0 18px;
+    }
+    QPushButton:hover {
+        background: #f8fafc;
+        border-color: #93c5fd;
+        color: #3b82f6;
+    }
+"""
+
 
 class CourseCard(QFrame):
     clicked = Signal(int, str)  # course_id, title
@@ -30,38 +47,39 @@ class CourseCard(QFrame):
         return str(value)
 
     def _setup_style(self):
-        self.setFixedSize(240, 230)
+        self.setFixedSize(260, 250)
         self.setStyleSheet("""
             CourseCard {
                 background: #ffffff;
-                border: 1px solid #e4e7ec;
-                border-radius: 16px;
+                border: 1.5px solid #f1f5f9;
+                border-radius: 20px;
             }
             CourseCard:hover {
-                border: 1px solid #1976d2;
+                border: 1.5px solid #93c5fd;
+                background: #fafbff;
             }
         """)
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(12)
-        shadow.setOffset(0, 2)
-        shadow.setColor(QColor(0, 0, 0, 25))
+        shadow.setBlurRadius(20)
+        shadow.setOffset(0, 4)
+        shadow.setColor(QColor(15, 23, 42, 20))
         self.setGraphicsEffect(shadow)
 
     def _setup_ui(self, course):
         layout = QVBoxLayout(self)
-        layout.setSpacing(8)
-        layout.setContentsMargins(0, 0, 0, 14)
+        layout.setSpacing(10)
+        layout.setContentsMargins(0, 0, 0, 16)
 
         # Thumbnail
         self.thumb_label = QLabel()
-        self.thumb_label.setFixedHeight(120)
+        self.thumb_label.setFixedHeight(130)
         self.thumb_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.thumb_label.setStyleSheet("""
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #e3f2fd, stop:1 #bbdefb);
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-            color: #1565c0;
-            font-size: 26px;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #dbeafe, stop:1 #bfdbfe);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            color: #2563eb;
+            font-size: 24px;
             font-weight: bold;
         """)
         self.thumb_label.setText(self.title[:3].upper() if self.title else "?")
@@ -71,22 +89,25 @@ class CourseCard(QFrame):
         title_label = QLabel(self.title)
         title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         title_label.setWordWrap(True)
-        title_label.setStyleSheet("font-size: 13px; font-weight: 600; color: #1d2939; padding: 0 14px; background: transparent;")
+        title_label.setStyleSheet("""
+            font-size: 14px; font-weight: 600; color: #0f172a;
+            padding: 0 16px; background: transparent;
+        """)
         layout.addWidget(title_label)
 
         # Lessons count badge
         lessons_count = course.get("lessons_count", "0")
         count_label = QLabel(f"{lessons_count} lessons")
         count_label.setStyleSheet("""
-            font-size: 11px;
-            color: #1976d2;
-            background: #e3f2fd;
-            border-radius: 10px;
-            padding: 3px 10px;
+            font-size: 12px;
+            color: #3b82f6;
+            background: #eff6ff;
+            border-radius: 12px;
+            padding: 4px 12px;
             font-weight: 500;
-            margin-left: 14px;
+            margin-left: 16px;
         """)
-        count_label.setFixedHeight(22)
+        count_label.setFixedHeight(26)
         layout.addWidget(count_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
         layout.addStretch()
@@ -103,7 +124,7 @@ class CourseCard(QFrame):
             pixmap = QPixmap()
             pixmap.loadFromData(reply.readAll())
             if not pixmap.isNull():
-                w, h = 240, 120
+                w, h = 260, 130
                 scaled = pixmap.scaled(
                     QSize(w, h),
                     Qt.AspectRatioMode.KeepAspectRatioByExpanding,
@@ -119,7 +140,7 @@ class CourseCard(QFrame):
                 painter = QPainter(rounded)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 path = QPainterPath()
-                radius = 16.0
+                radius = 20.0
                 path.moveTo(0, h)
                 path.lineTo(0, radius)
                 path.arcTo(0, 0, radius * 2, radius * 2, 180, -90)
@@ -155,46 +176,33 @@ class CoursesPage(QWidget):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 28, 32, 28)
-        layout.setSpacing(20)
+        layout.setContentsMargins(48, 40, 48, 32)
+        layout.setSpacing(0)
 
         # Header row with back button
         header_row = QHBoxLayout()
-        header_row.setSpacing(12)
+        header_row.setSpacing(16)
 
-        self.back_btn = QPushButton("Back")
+        self.back_btn = QPushButton("\u2190  Back")
         self.back_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.back_btn.setFixedHeight(36)
-        self.back_btn.setStyleSheet("""
-            QPushButton {
-                background: #ffffff;
-                border: 1px solid #d0d5dd;
-                border-radius: 8px;
-                color: #344054;
-                font-size: 13px;
-                font-weight: 600;
-                padding: 0 16px;
-            }
-            QPushButton:hover {
-                background: #f9fafb;
-                border-color: #1976d2;
-                color: #1976d2;
-            }
-        """)
+        self.back_btn.setFixedHeight(38)
+        self.back_btn.setStyleSheet(BACK_BTN_STYLE)
         self.back_btn.clicked.connect(self.back_requested.emit)
         header_row.addWidget(self.back_btn)
 
         self.header = QLabel("Courses")
-        self.header.setStyleSheet("font-size: 26px; font-weight: 700; color: #101828; background: transparent;")
+        self.header.setStyleSheet("font-size: 28px; font-weight: 700; color: #0f172a; background: transparent;")
         header_row.addWidget(self.header)
         header_row.addStretch()
 
         layout.addLayout(header_row)
 
+        layout.addSpacing(28)
+
         # Status label
         self.status_label = QLabel("Loading courses...")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_label.setStyleSheet("font-size: 14px; color: #667085; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         layout.addWidget(self.status_label)
 
         # Scroll area for cards
@@ -203,8 +211,8 @@ class CoursesPage(QWidget):
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
 
         self.grid_container = QWidget()
-        self.flow_layout = FlowLayout(self.grid_container, spacing=20)
-        self.flow_layout.setContentsMargins(4, 4, 4, 4)
+        self.flow_layout = FlowLayout(self.grid_container, spacing=24)
+        self.flow_layout.setContentsMargins(0, 0, 0, 0)
         self.scroll_area.setWidget(self.grid_container)
 
         layout.addWidget(self.scroll_area, stretch=1)
@@ -216,9 +224,9 @@ class CoursesPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        self.header.setText(f"Courses — {instructor_name}")
+        self.header.setText(f"Courses \u2014 {instructor_name}")
         self.status_label.setText("Loading courses...")
-        self.status_label.setStyleSheet("font-size: 14px; color: #667085; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         self.status_label.show()
         self.scroll_area.hide()
         self.api_client.fetch_courses(instructor_id)
@@ -245,4 +253,4 @@ class CoursesPage(QWidget):
     def _on_error(self, message: str):
         self.status_label.setText(f"Error: {message}")
         self.status_label.show()
-        self.status_label.setStyleSheet("font-size: 14px; color: #d32f2f; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #ef4444; padding: 60px 0; background: transparent;")

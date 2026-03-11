@@ -24,48 +24,51 @@ class InstructorCard(QFrame):
         return str(value)
 
     def _setup_style(self):
-        self.setFixedSize(200, 260)
+        self.setFixedSize(220, 280)
         self.setStyleSheet("""
             InstructorCard {
                 background: #ffffff;
-                border: 1px solid #e4e7ec;
-                border-radius: 16px;
+                border: 1.5px solid #f1f5f9;
+                border-radius: 20px;
             }
             InstructorCard:hover {
-                border: 1px solid #1976d2;
+                border: 1.5px solid #93c5fd;
+                background: #fafbff;
             }
         """)
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(12)
-        shadow.setOffset(0, 2)
-        shadow.setColor(QColor(0, 0, 0, 25))
+        shadow.setBlurRadius(20)
+        shadow.setOffset(0, 4)
+        shadow.setColor(QColor(15, 23, 42, 20))
         self.setGraphicsEffect(shadow)
 
     def _setup_ui(self, instructor):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setSpacing(10)
-        layout.setContentsMargins(16, 20, 16, 20)
+        layout.setSpacing(12)
+        layout.setContentsMargins(20, 28, 20, 24)
 
         # Photo placeholder
         self.photo_label = QLabel()
-        self.photo_label.setFixedSize(100, 100)
+        self.photo_label.setFixedSize(96, 96)
         self.photo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.photo_label.setStyleSheet("""
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #e3f2fd, stop:1 #bbdefb);
-            border-radius: 50px;
-            color: #1565c0;
-            font-size: 32px;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #dbeafe, stop:1 #bfdbfe);
+            border-radius: 48px;
+            color: #2563eb;
+            font-size: 28px;
             font-weight: bold;
         """)
         self.photo_label.setText(self.display_name[:2].upper() if self.display_name else "?")
         layout.addWidget(self.photo_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        layout.addSpacing(4)
+
         # Name
         name_label = QLabel(self.display_name)
         name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         name_label.setWordWrap(True)
-        name_label.setStyleSheet("font-size: 14px; font-weight: 600; color: #1d2939; background: transparent;")
+        name_label.setStyleSheet("font-size: 15px; font-weight: 600; color: #0f172a; background: transparent;")
         layout.addWidget(name_label)
 
         # Courses count badge
@@ -73,14 +76,14 @@ class InstructorCard(QFrame):
         count_label = QLabel(f"{courses_count} courses")
         count_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         count_label.setStyleSheet("""
-            font-size: 11px;
-            color: #1976d2;
-            background: #e3f2fd;
-            border-radius: 10px;
-            padding: 3px 10px;
+            font-size: 12px;
+            color: #3b82f6;
+            background: #eff6ff;
+            border-radius: 12px;
+            padding: 4px 14px;
             font-weight: 500;
         """)
-        count_label.setFixedHeight(22)
+        count_label.setFixedHeight(26)
         layout.addWidget(count_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
     def _load_photo(self, url: str, net_manager: QNetworkAccessManager):
@@ -96,21 +99,21 @@ class InstructorCard(QFrame):
             pixmap.loadFromData(reply.readAll())
             if not pixmap.isNull():
                 scaled = pixmap.scaled(
-                    QSize(100, 100),
+                    QSize(96, 96),
                     Qt.AspectRatioMode.KeepAspectRatioByExpanding,
                     Qt.TransformationMode.SmoothTransformation,
                 )
-                x = (scaled.width() - 100) // 2
-                y = (scaled.height() - 100) // 2
-                cropped = scaled.copy(x, y, 100, 100)
+                x = (scaled.width() - 96) // 2
+                y = (scaled.height() - 96) // 2
+                cropped = scaled.copy(x, y, 96, 96)
 
                 # Make circular
-                rounded = QPixmap(100, 100)
+                rounded = QPixmap(96, 96)
                 rounded.fill(Qt.GlobalColor.transparent)
                 painter = QPainter(rounded)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 path = QPainterPath()
-                path.addEllipse(0, 0, 100, 100)
+                path.addEllipse(0, 0, 96, 96)
                 painter.setClipPath(path)
                 painter.drawPixmap(0, 0, cropped)
                 painter.end()

@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QLineEdit, QLabel,
+    QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel,
     QScrollArea, QFrame,
 )
 from PySide6.QtNetwork import QNetworkAccessManager
@@ -26,25 +26,36 @@ class InstructorsPage(QWidget):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 28, 32, 28)
-        layout.setSpacing(20)
+        layout.setContentsMargins(48, 40, 48, 32)
+        layout.setSpacing(0)
 
         # Header
         header = QLabel("Instructors")
-        header.setStyleSheet("font-size: 26px; font-weight: 700; color: #101828; background: transparent;")
+        header.setStyleSheet("font-size: 28px; font-weight: 700; color: #0f172a; background: transparent;")
         layout.addWidget(header)
+
+        layout.addSpacing(4)
+
+        subtitle = QLabel("Select an instructor to view their courses")
+        subtitle.setStyleSheet("font-size: 14px; color: #64748b; background: transparent;")
+        layout.addWidget(subtitle)
+
+        layout.addSpacing(24)
 
         # Search bar
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search instructors...")
-        self.search_input.setFixedHeight(42)
+        self.search_input.setFixedHeight(44)
+        self.search_input.setMaximumWidth(400)
         self.search_input.textChanged.connect(lambda: self._search_timer.start())
         layout.addWidget(self.search_input)
+
+        layout.addSpacing(28)
 
         # Loading / error label
         self.status_label = QLabel("Loading instructors...")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_label.setStyleSheet("font-size: 14px; color: #667085; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         layout.addWidget(self.status_label)
 
         # Scroll area with flow layout
@@ -53,21 +64,22 @@ class InstructorsPage(QWidget):
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
 
         self.grid_container = QWidget()
-        self.flow_layout = FlowLayout(self.grid_container, spacing=20)
-        self.flow_layout.setContentsMargins(4, 4, 4, 4)
+        self.flow_layout = FlowLayout(self.grid_container, spacing=24)
+        self.flow_layout.setContentsMargins(0, 0, 0, 0)
         self.scroll_area.setWidget(self.grid_container)
 
         layout.addWidget(self.scroll_area, stretch=1)
 
     def load(self):
         self.status_label.setText("Loading instructors...")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         self.status_label.show()
         self.api_client.fetch_instructors()
 
     def _do_search(self):
         search = self.search_input.text().strip()
         self.status_label.setText("Searching...")
-        self.status_label.setStyleSheet("font-size: 14px; color: #667085; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         self.status_label.show()
         self.api_client.fetch_instructors(search=search)
 
@@ -92,4 +104,4 @@ class InstructorsPage(QWidget):
     def _on_error(self, message: str):
         self.status_label.setText(f"Error: {message}")
         self.status_label.show()
-        self.status_label.setStyleSheet("font-size: 14px; color: #d32f2f; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #ef4444; padding: 60px 0; background: transparent;")

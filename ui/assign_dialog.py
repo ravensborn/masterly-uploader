@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QCursor, QColor
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -18,39 +18,42 @@ class AssignRow(QFrame):
         self.setStyleSheet("""
             AssignRow {
                 background: #ffffff;
-                border: 1px solid #e4e7ec;
-                border-radius: 10px;
+                border: 1.5px solid #f1f5f9;
+                border-radius: 12px;
+            }
+            AssignRow:hover {
+                border-color: #e2e8f0;
             }
         """)
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(6)
+        shadow.setBlurRadius(8)
         shadow.setOffset(0, 1)
-        shadow.setColor(QColor(0, 0, 0, 15))
+        shadow.setColor(QColor(15, 23, 42, 10))
         self.setGraphicsEffect(shadow)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 10, 16, 10)
-        layout.setSpacing(12)
+        layout.setContentsMargins(18, 14, 18, 14)
+        layout.setSpacing(14)
 
         title = QLabel(lesson_title)
-        title.setStyleSheet("font-size: 13px; font-weight: 600; color: #1d2939; background: transparent;")
+        title.setStyleSheet("font-size: 13px; font-weight: 600; color: #1e293b; background: transparent;")
         title.setWordWrap(True)
         layout.addWidget(title, stretch=1)
 
         self.file_label = QLabel("No file selected")
-        self.file_label.setStyleSheet("font-size: 11px; color: #98a2b3; background: transparent;")
-        self.file_label.setMinimumWidth(150)
+        self.file_label.setStyleSheet("font-size: 12px; color: #94a3b8; background: transparent;")
+        self.file_label.setMinimumWidth(160)
         layout.addWidget(self.file_label)
 
         browse_btn = QPushButton("Browse")
         browse_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        browse_btn.setFixedSize(70, 30)
+        browse_btn.setFixedSize(80, 32)
         browse_btn.setStyleSheet("""
             QPushButton {
-                background: #f2f4f7; border: 1px solid #d0d5dd;
-                border-radius: 6px; color: #344054; font-size: 11px; font-weight: 600;
+                background: #f8fafc; border: 1.5px solid #e2e8f0;
+                border-radius: 8px; color: #475569; font-size: 12px; font-weight: 600;
             }
-            QPushButton:hover { background: #e4e7ec; }
+            QPushButton:hover { background: #f1f5f9; border-color: #cbd5e1; }
         """)
         browse_btn.clicked.connect(self._browse)
         layout.addWidget(browse_btn)
@@ -63,7 +66,7 @@ class AssignRow(QFrame):
         if file_path:
             self.file_path = file_path
             self.file_label.setText(os.path.basename(file_path))
-            self.file_label.setStyleSheet("font-size: 11px; color: #027a48; font-weight: 500; background: transparent;")
+            self.file_label.setStyleSheet("font-size: 12px; color: #059669; font-weight: 500; background: transparent;")
             self.file_label.setToolTip(file_path)
 
 
@@ -74,9 +77,9 @@ class AssignDialog(QDialog):
         """lessons: list of {lesson_id, lesson_title, course_storage_path, expected_qualities}"""
         super().__init__(parent)
         self.setWindowTitle("Assign Videos")
-        self.setMinimumSize(650, 400)
-        self.resize(750, 500)
-        self.setStyleSheet("background: #f0f2f5;")
+        self.setMinimumSize(700, 440)
+        self.resize(800, 540)
+        self.setStyleSheet("background: #f8fafc;")
 
         self.lessons = lessons
         self.result_map: dict[int, str] = {}  # lesson_id -> file_path
@@ -85,33 +88,39 @@ class AssignDialog(QDialog):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 20, 24, 20)
-        layout.setSpacing(16)
+        layout.setContentsMargins(32, 28, 32, 24)
+        layout.setSpacing(0)
 
         header = QLabel("Assign a video file to each lesson")
-        header.setStyleSheet("font-size: 18px; font-weight: 700; color: #101828; background: transparent;")
+        header.setStyleSheet("font-size: 20px; font-weight: 700; color: #0f172a; background: transparent;")
         layout.addWidget(header)
 
+        layout.addSpacing(4)
+
         hint = QLabel("Each lesson will be encoded to 720p and 1080p, then uploaded to R2.")
-        hint.setStyleSheet("font-size: 12px; color: #667085; background: transparent;")
+        hint.setStyleSheet("font-size: 13px; color: #64748b; background: transparent;")
         layout.addWidget(hint)
+
+        layout.addSpacing(20)
 
         # Bulk assign button
         bulk_row = QHBoxLayout()
         bulk_row.addStretch()
         bulk_btn = QPushButton("Assign same file to all")
         bulk_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        bulk_btn.setFixedHeight(32)
+        bulk_btn.setFixedHeight(34)
         bulk_btn.setStyleSheet("""
             QPushButton {
-                background: #e3f2fd; border: none; border-radius: 6px;
-                color: #1565c0; font-size: 12px; font-weight: 600; padding: 0 16px;
+                background: #eff6ff; border: none; border-radius: 8px;
+                color: #2563eb; font-size: 12px; font-weight: 600; padding: 0 18px;
             }
-            QPushButton:hover { background: #bbdefb; }
+            QPushButton:hover { background: #dbeafe; }
         """)
         bulk_btn.clicked.connect(self._bulk_assign)
         bulk_row.addWidget(bulk_btn)
         layout.addLayout(bulk_row)
+
+        layout.addSpacing(16)
 
         # Scroll area for rows
         scroll = QScrollArea()
@@ -133,32 +142,35 @@ class AssignDialog(QDialog):
         scroll.setWidget(container)
         layout.addWidget(scroll, stretch=1)
 
+        layout.addSpacing(20)
+
         # Bottom buttons
         btn_row = QHBoxLayout()
         btn_row.addStretch()
+        btn_row.setSpacing(12)
 
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        cancel_btn.setFixedSize(90, 38)
+        cancel_btn.setFixedSize(100, 40)
         cancel_btn.setStyleSheet("""
             QPushButton {
-                background: #ffffff; border: 1px solid #d0d5dd;
-                border-radius: 8px; color: #344054; font-size: 13px; font-weight: 600;
+                background: #ffffff; border: 1.5px solid #e2e8f0;
+                border-radius: 10px; color: #475569; font-size: 13px; font-weight: 600;
             }
-            QPushButton:hover { background: #f9fafb; }
+            QPushButton:hover { background: #f8fafc; border-color: #cbd5e1; }
         """)
         cancel_btn.clicked.connect(self.reject)
         btn_row.addWidget(cancel_btn)
 
         self.start_btn = QPushButton("Start Processing")
         self.start_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.start_btn.setFixedSize(150, 38)
+        self.start_btn.setFixedSize(160, 40)
         self.start_btn.setStyleSheet("""
             QPushButton {
-                background: #1976d2; border: none; border-radius: 8px;
+                background: #3b82f6; border: none; border-radius: 10px;
                 color: #ffffff; font-size: 13px; font-weight: 600;
             }
-            QPushButton:hover { background: #1565c0; }
+            QPushButton:hover { background: #2563eb; }
         """)
         self.start_btn.clicked.connect(self._on_start)
         btn_row.addWidget(self.start_btn)
@@ -174,7 +186,7 @@ class AssignDialog(QDialog):
             for row in self.rows:
                 row.file_path = file_path
                 row.file_label.setText(os.path.basename(file_path))
-                row.file_label.setStyleSheet("font-size: 11px; color: #027a48; font-weight: 500; background: transparent;")
+                row.file_label.setStyleSheet("font-size: 12px; color: #059669; font-weight: 500; background: transparent;")
                 row.file_label.setToolTip(file_path)
 
     def _on_start(self):
@@ -187,20 +199,19 @@ class AssignDialog(QDialog):
             self.start_btn.setText("Missing files!")
             self.start_btn.setStyleSheet("""
                 QPushButton {
-                    background: #b42318; border: none; border-radius: 8px;
+                    background: #ef4444; border: none; border-radius: 10px;
                     color: #ffffff; font-size: 13px; font-weight: 600;
                 }
             """)
             # Reset after a moment
-            from PySide6.QtCore import QTimer
             QTimer.singleShot(2000, lambda: (
                 self.start_btn.setText("Start Processing"),
                 self.start_btn.setStyleSheet("""
                     QPushButton {
-                        background: #1976d2; border: none; border-radius: 8px;
+                        background: #3b82f6; border: none; border-radius: 10px;
                         color: #ffffff; font-size: 13px; font-weight: 600;
                     }
-                    QPushButton:hover { background: #1565c0; }
+                    QPushButton:hover { background: #2563eb; }
                 """),
             ))
             return

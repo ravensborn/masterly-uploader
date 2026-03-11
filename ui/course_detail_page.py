@@ -15,6 +15,48 @@ from ui.video_processor import ProcessingTask
 from ui.process_dialog import ProcessDialog
 from ui.assign_dialog import AssignDialog
 
+BACK_BTN_STYLE = """
+    QPushButton {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 0 18px;
+    }
+    QPushButton:hover {
+        background: #f8fafc;
+        border-color: #93c5fd;
+        color: #3b82f6;
+    }
+"""
+
+CHECKBOX_STYLE = """
+    QCheckBox {
+        background: transparent;
+        spacing: 0px;
+    }
+    QCheckBox::indicator {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #cbd5e1;
+        border-radius: 5px;
+        background: #ffffff;
+    }
+    QCheckBox::indicator:hover {
+        border-color: #3b82f6;
+    }
+    QCheckBox::indicator:checked {
+        background: #3b82f6;
+        border-color: #3b82f6;
+    }
+    QCheckBox::indicator:indeterminate {
+        background: #93c5fd;
+        border-color: #3b82f6;
+    }
+"""
+
 
 def _localized(value):
     if isinstance(value, dict):
@@ -40,54 +82,34 @@ class LessonItem(QFrame):
         self.setStyleSheet("""
             LessonItem {
                 background: #ffffff;
-                border: 1px solid #e4e7ec;
-                border-radius: 8px;
+                border: 1.5px solid #f1f5f9;
+                border-radius: 10px;
             }
             LessonItem:hover {
-                border: 1px solid #1976d2;
-                background: #f5f9ff;
+                border: 1.5px solid #bfdbfe;
+                background: #f8faff;
             }
         """)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(12)
+        layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(14)
 
         # Checkbox
         self.checkbox = QCheckBox()
-        self.checkbox.setStyleSheet("""
-            QCheckBox {
-                background: transparent;
-                spacing: 4px;
-            }
-            QCheckBox::indicator {
-                width: 20px;
-                height: 20px;
-                border: 2px solid #98a2b3;
-                border-radius: 4px;
-                background: #ffffff;
-            }
-            QCheckBox::indicator:hover {
-                border-color: #1976d2;
-            }
-            QCheckBox::indicator:checked {
-                background: #1976d2;
-                border-color: #1976d2;
-                image: none;
-            }
-        """)
+        self.checkbox.setStyleSheet(CHECKBOX_STYLE)
         self.checkbox.stateChanged.connect(lambda: self.selection_changed.emit())
         layout.addWidget(self.checkbox)
 
         # Position number
         position = lesson.get("position", 0)
         pos_label = QLabel(str(position))
-        pos_label.setFixedSize(28, 28)
+        pos_label.setFixedSize(30, 30)
         pos_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         pos_label.setStyleSheet("""
-            background: #e3f2fd;
-            color: #1565c0;
-            border-radius: 14px;
+            background: #eff6ff;
+            color: #2563eb;
+            border-radius: 15px;
             font-size: 12px;
             font-weight: 700;
         """)
@@ -95,7 +117,7 @@ class LessonItem(QFrame):
 
         # Title
         title_label = QLabel(self.lesson_title)
-        title_label.setStyleSheet("font-size: 13px; font-weight: 500; color: #1d2939; background: transparent;")
+        title_label.setStyleSheet("font-size: 13px; font-weight: 500; color: #1e293b; background: transparent;")
         title_label.setWordWrap(True)
         layout.addWidget(title_label, stretch=1)
 
@@ -104,10 +126,10 @@ class LessonItem(QFrame):
         if video_count > 0:
             badge = QLabel(f"{video_count} video{'s' if video_count != 1 else ''}")
             badge.setStyleSheet("""
-                font-size: 10px; color: #667085; background: #f2f4f7;
-                border-radius: 8px; padding: 2px 8px; font-weight: 500;
+                font-size: 11px; color: #64748b; background: #f1f5f9;
+                border-radius: 10px; padding: 3px 10px; font-weight: 500;
             """)
-            badge.setFixedHeight(20)
+            badge.setFixedHeight(22)
             layout.addWidget(badge)
 
         # Quality badges
@@ -116,27 +138,27 @@ class LessonItem(QFrame):
             q_label = QLabel(str(q))
             if str(q) in existing:
                 q_label.setStyleSheet("""
-                    font-size: 10px; color: #027a48; background: #ecfdf3;
-                    border-radius: 8px; padding: 2px 6px; font-weight: 600;
+                    font-size: 11px; color: #059669; background: #ecfdf5;
+                    border-radius: 10px; padding: 3px 8px; font-weight: 600;
                 """)
             else:
                 q_label.setStyleSheet("""
-                    font-size: 10px; color: #b42318; background: #fef3f2;
-                    border-radius: 8px; padding: 2px 6px; font-weight: 600;
+                    font-size: 11px; color: #dc2626; background: #fef2f2;
+                    border-radius: 10px; padding: 3px 8px; font-weight: 600;
                 """)
-            q_label.setFixedHeight(20)
+            q_label.setFixedHeight(22)
             layout.addWidget(q_label)
 
         # Play button
         play_btn = QPushButton("Play")
         play_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        play_btn.setFixedSize(50, 26)
+        play_btn.setFixedSize(56, 28)
         play_btn.setStyleSheet("""
             QPushButton {
-                background: #e3f2fd; border: none; border-radius: 6px;
-                color: #1565c0; font-size: 11px; font-weight: 600;
+                background: #eff6ff; border: none; border-radius: 8px;
+                color: #2563eb; font-size: 11px; font-weight: 600;
             }
-            QPushButton:hover { background: #bbdefb; }
+            QPushButton:hover { background: #dbeafe; }
         """)
         play_btn.clicked.connect(self._on_play)
         play_btn.setVisible(len(self.videos) > 0)
@@ -166,83 +188,60 @@ class LessonGroupWidget(QFrame):
         self.course_storage_path = course_storage_path
         self.setStyleSheet("""
             LessonGroupWidget {
-                background: #f9fafb;
-                border: 1px solid #e4e7ec;
-                border-radius: 12px;
+                background: #ffffff;
+                border: 1.5px solid #f1f5f9;
+                border-radius: 16px;
             }
         """)
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(8)
-        shadow.setOffset(0, 1)
-        shadow.setColor(QColor(0, 0, 0, 15))
+        shadow.setBlurRadius(16)
+        shadow.setOffset(0, 2)
+        shadow.setColor(QColor(15, 23, 42, 15))
         self.setGraphicsEffect(shadow)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 14, 16, 14)
-        layout.setSpacing(10)
+        layout.setContentsMargins(20, 18, 20, 18)
+        layout.setSpacing(14)
 
         # Group header
         header_row = QHBoxLayout()
-        header_row.setSpacing(10)
+        header_row.setSpacing(12)
 
         # Select all checkbox
         self.select_all_cb = QCheckBox()
-        self.select_all_cb.setStyleSheet("""
-            QCheckBox {
-                background: transparent;
-                spacing: 4px;
-            }
-            QCheckBox::indicator {
-                width: 20px;
-                height: 20px;
-                border: 2px solid #98a2b3;
-                border-radius: 4px;
-                background: #ffffff;
-            }
-            QCheckBox::indicator:hover {
-                border-color: #1976d2;
-            }
-            QCheckBox::indicator:checked {
-                background: #1976d2;
-                border-color: #1976d2;
-            }
-            QCheckBox::indicator:indeterminate {
-                background: #bbdefb;
-                border-color: #1976d2;
-            }
-        """)
+        self.select_all_cb.setStyleSheet(CHECKBOX_STYLE)
         self.select_all_cb.stateChanged.connect(self._on_select_all)
         header_row.addWidget(self.select_all_cb)
 
         position = group.get("position", 0)
         pos_label = QLabel(f"Group {position}")
-        pos_label.setStyleSheet("font-size: 11px; color: #667085; font-weight: 600; background: transparent;")
+        pos_label.setStyleSheet("font-size: 11px; color: #94a3b8; font-weight: 600; background: transparent; letter-spacing: 0.5px;")
         header_row.addWidget(pos_label)
 
         title = _localized(group.get("title", ""))
         title_label = QLabel(title)
-        title_label.setStyleSheet("font-size: 15px; font-weight: 700; color: #101828; background: transparent;")
+        title_label.setStyleSheet("font-size: 16px; font-weight: 700; color: #0f172a; background: transparent;")
         title_label.setWordWrap(True)
         header_row.addWidget(title_label, stretch=1)
 
         lessons = group.get("lessons", [])
         count_label = QLabel(f"{len(lessons)} lesson{'s' if len(lessons) != 1 else ''}")
         count_label.setStyleSheet("""
-            font-size: 11px; color: #1976d2; background: #e3f2fd;
-            border-radius: 10px; padding: 3px 10px; font-weight: 500;
+            font-size: 12px; color: #3b82f6; background: #eff6ff;
+            border-radius: 12px; padding: 4px 12px; font-weight: 500;
         """)
-        count_label.setFixedHeight(22)
+        count_label.setFixedHeight(26)
         header_row.addWidget(count_label)
 
-        self.toggle_btn = QPushButton("-")
-        self.toggle_btn.setFixedSize(28, 28)
+        self.toggle_btn = QPushButton("\u2212")
+        self.toggle_btn.setFixedSize(32, 32)
         self.toggle_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.toggle_btn.setStyleSheet("""
             QPushButton {
-                background: #ffffff; border: 1px solid #d0d5dd;
-                border-radius: 14px; font-size: 14px; font-weight: bold; color: #344054;
+                background: #f8fafc; border: 1.5px solid #e2e8f0;
+                border-radius: 16px; font-size: 16px; font-weight: bold; color: #64748b;
             }
-            QPushButton:hover { background: #f2f4f7; }
+            QPushButton:hover { background: #f1f5f9; border-color: #cbd5e1; }
         """)
         self.toggle_btn.clicked.connect(self._toggle)
         header_row.addWidget(self.toggle_btn)
@@ -251,8 +250,9 @@ class LessonGroupWidget(QFrame):
 
         # Lessons container
         self.lessons_container = QWidget()
+        self.lessons_container.setStyleSheet("background: transparent;")
         lessons_layout = QVBoxLayout(self.lessons_container)
-        lessons_layout.setContentsMargins(0, 0, 0, 0)
+        lessons_layout.setContentsMargins(0, 4, 0, 0)
         lessons_layout.setSpacing(6)
 
         self.lesson_items: list[LessonItem] = []
@@ -270,7 +270,7 @@ class LessonGroupWidget(QFrame):
     def _toggle(self):
         self._expanded = not self._expanded
         self.lessons_container.setVisible(self._expanded)
-        self.toggle_btn.setText("-" if self._expanded else "+")
+        self.toggle_btn.setText("\u2212" if self._expanded else "+")
 
     def _on_select_all(self, state):
         checked = Qt.CheckState(state) == Qt.CheckState.Checked
@@ -310,40 +310,33 @@ class CourseDetailPage(QWidget):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 28, 32, 28)
-        layout.setSpacing(20)
+        layout.setContentsMargins(48, 40, 48, 24)
+        layout.setSpacing(0)
 
         # Header row
         header_row = QHBoxLayout()
-        header_row.setSpacing(12)
+        header_row.setSpacing(16)
 
-        self.back_btn = QPushButton("Back")
+        self.back_btn = QPushButton("\u2190  Back")
         self.back_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.back_btn.setFixedHeight(36)
-        self.back_btn.setStyleSheet("""
-            QPushButton {
-                background: #ffffff; border: 1px solid #d0d5dd;
-                border-radius: 8px; color: #344054; font-size: 13px;
-                font-weight: 600; padding: 0 16px;
-            }
-            QPushButton:hover {
-                background: #f9fafb; border-color: #1976d2; color: #1976d2;
-            }
-        """)
+        self.back_btn.setFixedHeight(38)
+        self.back_btn.setStyleSheet(BACK_BTN_STYLE)
         self.back_btn.clicked.connect(self.back_requested.emit)
         header_row.addWidget(self.back_btn)
 
         self.header = QLabel("Course")
-        self.header.setStyleSheet("font-size: 26px; font-weight: 700; color: #101828; background: transparent;")
+        self.header.setStyleSheet("font-size: 28px; font-weight: 700; color: #0f172a; background: transparent;")
         header_row.addWidget(self.header)
         header_row.addStretch()
 
         layout.addLayout(header_row)
 
+        layout.addSpacing(24)
+
         # Status
         self.status_label = QLabel("Loading...")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_label.setStyleSheet("font-size: 14px; color: #667085; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         layout.addWidget(self.status_label)
 
         # Scroll area for groups
@@ -360,41 +353,43 @@ class CourseDetailPage(QWidget):
 
         layout.addWidget(self.scroll_area, stretch=1)
 
+        layout.addSpacing(16)
+
         # Action bar (hidden until lessons selected)
         self.action_bar = QFrame()
         self.action_bar.setStyleSheet("""
             QFrame {
                 background: #ffffff;
-                border: 1px solid #e4e7ec;
-                border-radius: 12px;
+                border: 1.5px solid #e2e8f0;
+                border-radius: 14px;
             }
         """)
         action_shadow = QGraphicsDropShadowEffect(self.action_bar)
-        action_shadow.setBlurRadius(16)
-        action_shadow.setOffset(0, -2)
-        action_shadow.setColor(QColor(0, 0, 0, 30))
+        action_shadow.setBlurRadius(24)
+        action_shadow.setOffset(0, -4)
+        action_shadow.setColor(QColor(15, 23, 42, 20))
         self.action_bar.setGraphicsEffect(action_shadow)
 
         action_layout = QHBoxLayout(self.action_bar)
-        action_layout.setContentsMargins(20, 12, 20, 12)
+        action_layout.setContentsMargins(24, 14, 24, 14)
         action_layout.setSpacing(16)
 
         self.selection_label = QLabel("0 lessons selected")
-        self.selection_label.setStyleSheet("font-size: 13px; color: #344054; font-weight: 500; background: transparent;")
+        self.selection_label.setStyleSheet("font-size: 14px; color: #475569; font-weight: 500; background: transparent;")
         action_layout.addWidget(self.selection_label)
 
         action_layout.addStretch()
 
         self.process_btn = QPushButton("Assign Videos & Process")
         self.process_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.process_btn.setFixedHeight(38)
+        self.process_btn.setFixedHeight(40)
         self.process_btn.setStyleSheet("""
             QPushButton {
-                background: #1976d2; border: none; border-radius: 8px;
+                background: #3b82f6; border: none; border-radius: 10px;
                 color: #ffffff; font-size: 13px; font-weight: 600;
-                padding: 0 24px;
+                padding: 0 28px;
             }
-            QPushButton:hover { background: #1565c0; }
+            QPushButton:hover { background: #2563eb; }
         """)
         self.process_btn.clicked.connect(self._on_process_clicked)
         action_layout.addWidget(self.process_btn)
@@ -412,7 +407,7 @@ class CourseDetailPage(QWidget):
 
         self.header.setText(course_title)
         self.status_label.setText("Loading course details...")
-        self.status_label.setStyleSheet("font-size: 14px; color: #667085; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #94a3b8; padding: 60px 0; background: transparent;")
         self.status_label.show()
         self.scroll_area.hide()
         self.action_bar.hide()
@@ -503,7 +498,7 @@ class CourseDetailPage(QWidget):
 
     def _on_play_requested(self, storage_path: str, filename: str):
         self.status_label.setText("Generating video URL...")
-        self.status_label.setStyleSheet("font-size: 14px; color: #1976d2; padding: 10px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #3b82f6; padding: 12px 0; background: transparent;")
         self.status_label.show()
         self.r2_client.generate_url(storage_path, filename)
 
@@ -523,9 +518,9 @@ class CourseDetailPage(QWidget):
     def _on_r2_error(self, message: str):
         self.status_label.setText(f"Error: {message}")
         self.status_label.show()
-        self.status_label.setStyleSheet("font-size: 14px; color: #d32f2f; padding: 10px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #ef4444; padding: 12px 0; background: transparent;")
 
     def _on_error(self, message: str):
         self.status_label.setText(f"Error: {message}")
         self.status_label.show()
-        self.status_label.setStyleSheet("font-size: 14px; color: #d32f2f; padding: 40px; background: transparent;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #ef4444; padding: 60px 0; background: transparent;")
