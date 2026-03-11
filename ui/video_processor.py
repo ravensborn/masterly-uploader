@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import boto3
 from botocore.config import Config
@@ -32,6 +33,9 @@ def _detect_hw_encoder() -> dict | None:
 
 
 _HW_ENCODER = _detect_hw_encoder()
+
+# GPU encoders handle ~3 concurrent sessions; CPU uses half the cores
+MAX_WORKERS = 3 if _HW_ENCODER else max(1, (os.cpu_count() or 2) // 2)
 
 def get_encoder_label() -> str:
     if _HW_ENCODER:
@@ -85,20 +89,33 @@ class ProcessingWorker(QThread):
         self._cancelled = True
 
     def run(self):
+        # Build all jobs: (task_idx, task, quality)
+        jobs = []
         for task_idx, task in enumerate(self.tasks):
-            if self._cancelled:
-                break
             for quality in task.qualities:
+                jobs.append((task_idx, task, quality))
+
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = {}
+            for job in jobs:
                 if self._cancelled:
                     break
+                future = pool.submit(self._process_one, *job)
+                futures[future] = job
+
+            for future in as_completed(futures):
+                task_idx, task, quality = futures[future]
                 try:
-                    self._process_one(task_idx, task, quality)
+                    future.result()
                 except Exception as e:
                     self.task_error.emit(task_idx, quality, str(e))
 
         self.all_done.emit()
 
     def _process_one(self, task_idx: int, task: ProcessingTask, quality: str):
+        if self._cancelled:
+            return
+
         height = QUALITY_MAP.get(quality, {}).get("height", 1080)
         r2_key = f"{task.course_storage_path}/{task.lesson_id}_{quality}.mp4"
         filename = f"{task.lesson_id}_{quality}.mp4"
@@ -128,6 +145,9 @@ class ProcessingWorker(QThread):
 
         self.task_progress.emit(task_idx, quality, "encoding", 100)
 
+        if self._cancelled:
+            return
+
         # 2. Delete old from R2
         self.task_progress.emit(task_idx, quality, "deleting", 0)
         try:
@@ -135,6 +155,9 @@ class ProcessingWorker(QThread):
         except Exception:
             pass  # OK if it doesn't exist
         self.task_progress.emit(task_idx, quality, "deleting", 100)
+
+        if self._cancelled:
+            return
 
         # 3. Upload to R2
         self.task_progress.emit(task_idx, quality, "uploading", 0)
