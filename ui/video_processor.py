@@ -1,10 +1,14 @@
 import os
 import re
+import shutil
 import subprocess
 
 import boto3
 from botocore.config import Config
 from PySide6.QtCore import QObject, Signal, QThread
+
+FFMPEG = shutil.which("ffmpeg") or "ffmpeg"
+FFPROBE = shutil.which("ffprobe") or "ffprobe"
 
 
 class ProcessingTask:
@@ -78,7 +82,8 @@ class ProcessingWorker(QThread):
         duration = self._get_duration(task.source_file)
 
         cmd = [
-            "ffmpeg", "-y", "-i", task.source_file,
+            FFMPEG, "-y", "-hwaccel", "none",
+            "-i", task.source_file,
             "-vf", f"scale=-2:{height}",
             "-c:v", "libx264", "-preset", "medium", "-crf", "23",
             "-c:a", "aac", "-b:a", "128k",
@@ -90,7 +95,9 @@ class ProcessingWorker(QThread):
             universal_newlines=True,
         )
 
+        stderr_lines = []
         for line in proc.stderr:
+            stderr_lines.append(line)
             if self._cancelled:
                 proc.kill()
                 return
@@ -103,7 +110,9 @@ class ProcessingWorker(QThread):
 
         proc.wait()
         if proc.returncode != 0:
-            raise RuntimeError(f"ffmpeg failed with exit code {proc.returncode}")
+            # Get the last few meaningful lines from stderr
+            error_detail = "".join(stderr_lines[-10:]).strip()
+            raise RuntimeError(f"ffmpeg exit code {proc.returncode}:\n{error_detail}")
 
         self.task_progress.emit(task_idx, quality, "encoding", 100)
 
@@ -143,7 +152,7 @@ class ProcessingWorker(QThread):
     def _get_duration(self, filepath: str) -> float:
         try:
             result = subprocess.run(
-                ["ffprobe", "-v", "quiet", "-show_entries", "format=duration",
+                [FFPROBE, "-v", "quiet", "-show_entries", "format=duration",
                  "-of", "default=noprint_wrappers=1:nokey=1", filepath],
                 capture_output=True, text=True,
             )
