@@ -5,7 +5,7 @@ import tempfile
 
 import boto3
 from botocore.config import Config
-from PyQt6.QtCore import QObject, pyqtSignal, QThread
+from PySide6.QtCore import QObject, Signal, QThread
 
 
 class ProcessingTask:
@@ -27,11 +27,11 @@ QUALITY_MAP = {
 class ProcessingWorker(QThread):
     # (task_index, quality, stage, progress_pct)
     # stage: "encoding", "deleting", "uploading", "done", "error"
-    task_progress = pyqtSignal(int, str, str, int)
+    task_progress = Signal(int, str, str, int)
     # (task_index, quality, error_message)
-    task_error = pyqtSignal(int, str, str)
+    task_error = Signal(int, str, str)
     # overall done
-    all_done = pyqtSignal()
+    all_done = Signal()
 
     def __init__(self, tasks: list[ProcessingTask], parent=None):
         super().__init__(parent)

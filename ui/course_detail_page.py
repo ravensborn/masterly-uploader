@@ -2,9 +2,9 @@ import subprocess
 import shutil
 import sys
 
-from PyQt6.QtCore import Qt, pyqtSignal, QUrl
-from PyQt6.QtGui import QCursor, QColor, QDesktopServices
-from PyQt6.QtWidgets import (
+from PySide6.QtCore import Qt, Signal, QUrl
+from PySide6.QtGui import QCursor, QColor, QDesktopServices
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QScrollArea, QFrame, QPushButton, QGraphicsDropShadowEffect,
     QCheckBox, QFileDialog,
@@ -26,8 +26,8 @@ def _localized(value):
 
 class LessonItem(QFrame):
     """A single lesson row with checkbox."""
-    play_requested = pyqtSignal(str, str)  # storage_path, filename
-    selection_changed = pyqtSignal()
+    play_requested = Signal(str, str)  # storage_path, filename
+    selection_changed = Signal()
 
     def __init__(self, lesson: dict, course_storage_path: str, parent=None):
         super().__init__(parent)
@@ -157,8 +157,8 @@ class LessonItem(QFrame):
 
 class LessonGroupWidget(QFrame):
     """A collapsible group of lessons."""
-    play_requested = pyqtSignal(str, str)
-    selection_changed = pyqtSignal()
+    play_requested = Signal(str, str)
+    selection_changed = Signal()
 
     def __init__(self, group: dict, course_storage_path: str, parent=None):
         super().__init__(parent)
@@ -273,7 +273,7 @@ class LessonGroupWidget(QFrame):
         self.toggle_btn.setText("-" if self._expanded else "+")
 
     def _on_select_all(self, state):
-        checked = state == Qt.CheckState.Checked.value
+        checked = Qt.CheckState(state) == Qt.CheckState.Checked
         for item in self.lesson_items:
             item.set_checked(checked)
 
@@ -294,7 +294,7 @@ class LessonGroupWidget(QFrame):
 
 
 class CourseDetailPage(QWidget):
-    back_requested = pyqtSignal()
+    back_requested = Signal()
 
     def __init__(self, api_client, parent=None):
         super().__init__(parent)

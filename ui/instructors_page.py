@@ -1,16 +1,16 @@
-from PyQt6.QtCore import Qt, pyqtSignal, QTimer
-from PyQt6.QtWidgets import (
+from PySide6.QtCore import Qt, Signal, QTimer
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QLineEdit, QLabel,
     QScrollArea, QFrame,
 )
-from PyQt6.QtNetwork import QNetworkAccessManager
+from PySide6.QtNetwork import QNetworkAccessManager
 
 from ui.instructor_card import InstructorCard
 from ui.flow_layout import FlowLayout
 
 
 class InstructorsPage(QWidget):
-    instructor_selected = pyqtSignal(int, str)  # id, name
+    instructor_selected = Signal(int, str)  # id, name
 
     def __init__(self, api_client, parent=None):
         super().__init__(parent)

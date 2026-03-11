@@ -1,18 +1,17 @@
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
-from PyQt6.QtGui import QPixmap, QCursor, QColor, QPainter, QPainterPath, QBrush
-from PyQt6.QtWidgets import (
+from PySide6.QtCore import Qt, Signal, QSize, QUrl
+from PySide6.QtGui import QPixmap, QCursor, QColor, QPainter, QPainterPath, QBrush
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QScrollArea, QFrame, QPushButton,
     QGraphicsDropShadowEffect,
 )
-from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PyQt6.QtCore import QUrl
+from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from ui.flow_layout import FlowLayout
 
 
 class CourseCard(QFrame):
-    clicked = pyqtSignal(int, str)  # course_id, title
+    clicked = Signal(int, str)  # course_id, title
 
     def __init__(self, course: dict, net_manager: QNetworkAccessManager, parent=None):
         super().__init__(parent)
@@ -143,8 +142,8 @@ class CourseCard(QFrame):
 
 
 class CoursesPage(QWidget):
-    course_selected = pyqtSignal(int, str)  # course_id, title
-    back_requested = pyqtSignal()
+    course_selected = Signal(int, str)  # course_id, title
+    back_requested = Signal()
 
     def __init__(self, api_client, parent=None):
         super().__init__(parent)

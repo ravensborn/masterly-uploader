@@ -3,12 +3,12 @@ from urllib.request import Request, urlopen
 from urllib.parse import quote
 import base64
 
-from PyQt6.QtCore import QObject, pyqtSignal, QThread
+from PySide6.QtCore import QObject, Signal, QThread
 
 
 class _FetchThread(QThread):
-    result = pyqtSignal(dict)
-    error = pyqtSignal(str)
+    result = Signal(dict)
+    error = Signal(str)
 
     def __init__(self, url: str, auth_header: str, parent=None):
         super().__init__(parent)
@@ -29,10 +29,10 @@ class _FetchThread(QThread):
 
 
 class ApiClient(QObject):
-    instructors_loaded = pyqtSignal(list)
-    courses_loaded = pyqtSignal(list)
-    course_detail_loaded = pyqtSignal(dict)
-    error = pyqtSignal(str)
+    instructors_loaded = Signal(list)
+    courses_loaded = Signal(list)
+    course_detail_loaded = Signal(dict)
+    error = Signal(str)
 
     def __init__(self, base_url: str, username: str = "admin", password: str = "password", parent=None):
         super().__init__(parent)

@@ -2,7 +2,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
-from PyQt6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 
 load_dotenv()
 

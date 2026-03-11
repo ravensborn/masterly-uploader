@@ -1,13 +1,11 @@
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
-from PyQt6.QtGui import QPixmap, QCursor, QPainter, QPainterPath
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
-from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PyQt6.QtCore import QUrl
-from PyQt6.QtGui import QColor
+from PySide6.QtCore import Qt, Signal, QSize, QUrl
+from PySide6.QtGui import QPixmap, QCursor, QPainter, QPainterPath, QColor
+from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QGraphicsDropShadowEffect
+from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 
 class InstructorCard(QFrame):
-    clicked = pyqtSignal(int, str)  # instructor_id, display_name
+    clicked = Signal(int, str)  # instructor_id, display_name
 
     def __init__(self, instructor: dict, net_manager: QNetworkAccessManager, parent=None):
         super().__init__(parent)

@@ -1,10 +1,10 @@
 # R2 Video Uploader — Dev Environment
 
-A Docker-based development environment for building a PyQt6 desktop app that converts videos via FFmpeg and uploads them to Cloudflare R2 with resumable multipart uploads.
+A Docker-based development environment for building a PySide6 desktop app that converts videos via FFmpeg and uploads them to Cloudflare R2 with resumable multipart uploads.
 
 ## What's Included
 
-- **Python 3.12** with boto3, PyQt6, ffmpeg-python
+- **Python 3.12** with boto3, PySide6, ffmpeg-python
 - **FFmpeg** for video conversion
 - **Claude Code** (native installer) for AI-assisted development
 
@@ -30,7 +30,7 @@ docker compose exec r2-uploader bash
 
 # 6. Inside the container — verify tools
 ffmpeg -version
-python -c "import PyQt6; print('PyQt6 OK')"
+python -c "import PySide6; print('PySide6 OK')"
 claude --version
 ```
 
@@ -45,7 +45,7 @@ claude
 
 ## GUI on Linux
 
-The compose file mounts the X11 socket so PyQt6 windows display on your host. Make sure to run:
+The compose file mounts the X11 socket so PySide6 windows display on your host. Make sure to run:
 
 ```bash
 xhost +local:docker

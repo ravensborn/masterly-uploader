@@ -2,12 +2,12 @@ import os
 
 import boto3
 from botocore.config import Config
-from PyQt6.QtCore import QObject, pyqtSignal, QThread
+from PySide6.QtCore import QObject, Signal, QThread
 
 
 class _PresignThread(QThread):
-    result = pyqtSignal(str)
-    error = pyqtSignal(str)
+    result = Signal(str)
+    error = Signal(str)
 
     def __init__(self, s3_client, bucket: str, key: str, parent=None):
         super().__init__(parent)
@@ -28,8 +28,8 @@ class _PresignThread(QThread):
 
 
 class R2Client(QObject):
-    url_ready = pyqtSignal(str)
-    error = pyqtSignal(str)
+    url_ready = Signal(str)
+    error = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)

@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QMainWindow, QStackedWidget
-from PyQt6.QtCore import QSize
+from PySide6.QtWidgets import QMainWindow, QStackedWidget
+from PySide6.QtCore import QSize
 
 from ui.api_client import ApiClient
 from ui.instructors_page import InstructorsPage

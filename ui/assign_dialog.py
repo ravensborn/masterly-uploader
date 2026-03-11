@@ -1,8 +1,8 @@
 import os
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QCursor, QColor
-from PyQt6.QtWidgets import (
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor, QColor
+from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QScrollArea, QFrame, QWidget, QFileDialog, QGraphicsDropShadowEffect,
 )
@@ -192,7 +192,7 @@ class AssignDialog(QDialog):
                 }
             """)
             # Reset after a moment
-            from PyQt6.QtCore import QTimer
+            from PySide6.QtCore import QTimer
             QTimer.singleShot(2000, lambda: (
                 self.start_btn.setText("Start Processing"),
                 self.start_btn.setStyleSheet("""
