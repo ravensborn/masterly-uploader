@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-import tempfile
 
 import boto3
 from botocore.config import Config
@@ -72,8 +71,9 @@ class ProcessingWorker(QThread):
 
         # 1. Encode with ffmpeg
         self.task_progress.emit(task_idx, quality, "encoding", 0)
-        tmp_dir = tempfile.mkdtemp(prefix="video_proc_")
-        output_path = os.path.join(tmp_dir, filename)
+        output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output")
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, filename)
 
         duration = self._get_duration(task.source_file)
 
@@ -132,10 +132,9 @@ class ProcessingWorker(QThread):
         )
         self.task_progress.emit(task_idx, quality, "uploading", 100)
 
-        # Cleanup temp file
+        # Cleanup converted file
         try:
             os.remove(output_path)
-            os.rmdir(tmp_dir)
         except OSError:
             pass
 
