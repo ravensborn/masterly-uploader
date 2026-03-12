@@ -79,16 +79,32 @@ class LessonItem(QFrame):
         self.course_storage_path = course_storage_path
         self.videos = lesson.get("videos", [])
         self.expected_qualities = [str(q) for q in lesson.get("expected_qualities", ["720p", "1080p"])]
-        self.setStyleSheet("""
-            LessonItem {
-                background: #ffffff;
-                border: 1.5px solid #f1f5f9;
+        self.is_uploaded = (
+            len(self.videos) > 0
+            and all(v.get("is_uploaded", False) for v in self.videos)
+        )
+
+        if self.is_uploaded:
+            border_color = "#bbf7d0"
+            hover_border = "#86efac"
+            bg = "#f0fdf4"
+            hover_bg = "#ecfdf5"
+        else:
+            border_color = "#fecaca"
+            hover_border = "#f87171"
+            bg = "#fef2f2"
+            hover_bg = "#fee2e2"
+
+        self.setStyleSheet(f"""
+            LessonItem {{
+                background: {bg};
+                border: 1.5px solid {border_color};
                 border-radius: 10px;
-            }
-            LessonItem:hover {
-                border: 1.5px solid #bfdbfe;
-                background: #f8faff;
-            }
+            }}
+            LessonItem:hover {{
+                border: 1.5px solid {hover_border};
+                background: {hover_bg};
+            }}
         """)
 
         layout = QHBoxLayout(self)
@@ -122,10 +138,12 @@ class LessonItem(QFrame):
         layout.addWidget(title_label, stretch=1)
 
         # Quality badges
-        existing = {v.get("quality") for v in self.videos}
+        uploaded_qualities = {
+            v.get("quality") for v in self.videos if v.get("is_uploaded", False)
+        }
         for q in self.expected_qualities:
             q_label = QLabel(str(q))
-            if str(q) in existing:
+            if str(q) in uploaded_qualities:
                 q_label.setStyleSheet("""
                     font-size: 11px; color: #059669; background: #ecfdf5;
                     border-radius: 10px; padding: 3px 8px; font-weight: 600;
@@ -157,7 +175,7 @@ class LessonItem(QFrame):
         if not self.videos:
             return
         v = next((v for v in self.videos if v.get("quality") == "1080p"), self.videos[0])
-        self.play_requested.emit(v.get("storage_path", ""), v.get("filename", ""))
+        self.play_requested.emit(v.get("storage_path", ""), v.get("file_path", ""))
 
     def is_checked(self):
         return self.checkbox.isChecked()
@@ -381,7 +399,9 @@ class CourseDetailPage(QWidget):
         self.action_bar.hide()
         layout.addWidget(self.action_bar)
 
-    def load(self, course_id: int, course_title: str):
+    def load(self, course_id: int, course_title: str = ""):
+        self._current_course_id = course_id
+        self._current_course_title = course_title or self.header.text()
         # Clear previous
         self._groups.clear()
         while self.content_layout.count():
@@ -467,18 +487,27 @@ class CourseDetailPage(QWidget):
             if not file_path:
                 continue
             qualities = item.expected_qualities if item.expected_qualities else ["720p", "1080p"]
+            video_ids = {v.get("quality"): v.get("id") for v in item.videos if v.get("quality") and v.get("id")}
             task = ProcessingTask(
                 lesson_id=item.lesson_id,
                 lesson_title=item.lesson_title,
                 source_file=file_path,
                 course_storage_path=item.course_storage_path,
                 qualities=qualities,
+                video_ids=video_ids,
             )
             tasks.append(task)
 
         if tasks:
-            dialog = ProcessDialog(tasks, self)
+            dialog = ProcessDialog(
+                tasks,
+                api_base_url=self.api_client.base_url,
+                api_auth_header=self.api_client._auth_header,
+                parent=self,
+            )
             dialog.exec()
+            # Reload course data to reflect updated upload status
+            self.load(self._current_course_id)
 
     def _on_play_requested(self, storage_path: str, filename: str):
         self.status_label.setText("Generating video URL...")

@@ -125,9 +125,11 @@ class TaskRow(QFrame):
 
 
 class ProcessDialog(QDialog):
-    def __init__(self, tasks: list[ProcessingTask], parent=None):
+    def __init__(self, tasks: list[ProcessingTask], api_base_url: str = "", api_auth_header: str = "", parent=None):
         super().__init__(parent)
         self.setWindowTitle("Processing Videos")
+        self._api_base_url = api_base_url
+        self._api_auth_header = api_auth_header
         self.setMinimumSize(650, 440)
         self.resize(760, 540)
         self.setStyleSheet("background: #f8fafc;")
@@ -246,7 +248,7 @@ class ProcessDialog(QDialog):
         layout.addLayout(btn_row)
 
     def _start(self):
-        self.worker = ProcessingWorker(self.tasks, self)
+        self.worker = ProcessingWorker(self.tasks, self._api_base_url, self._api_auth_header, self)
         self.worker.task_progress.connect(self._on_task_progress)
         self.worker.task_error.connect(self._on_task_error)
         self.worker.encoder_fallback.connect(self._on_encoder_fallback)

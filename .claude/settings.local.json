@@ -15,7 +15,12 @@
       "Bash(pip3 install:*)",
       "Bash(which ffmpeg:*)",
       "Bash(ffmpeg -encoders 2>/dev/null | grep -E \"h264_nvenc|h264_amf|h264_qsv|h264_vaapi\" || echo \"No HW encoders found in this env \\(check on your local machine\\)\")",
-      "Bash(chmod 644 /app/.env.example)"
+      "Bash(chmod 644 /app/.env.example)",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('ui/video_processor.py'\\).read\\(\\)\\); ast.parse\\(open\\('ui/course_detail_page.py'\\).read\\(\\)\\); ast.parse\\(open\\('ui/process_dialog.py'\\).read\\(\\)\\); ast.parse\\(open\\('ui/api_client.py'\\).read\\(\\)\\); print\\('All files parse OK'\\)\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\" -X PATCH -u admin:password -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"is_uploaded\": true, \"duration\": 60}' https://masterly-api.the-nebula.tech/api/v1/internal/videos/1 2>&1)",
+      "Bash(curl -s -u admin:password -H \"Accept: application/json\" https://masterly-api.the-nebula.tech/api/v1/internal/courses/1 2>&1 | python3 -m json.tool | head -80)",
+      "Bash(curl -s -X PATCH -u admin:password -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"is_uploaded\": true, \"duration\": 60}' https://masterly-api.the-nebula.tech/api/v1/internal/videos/1 && echo \"\" && curl -s -X PATCH -u admin:password -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"is_uploaded\": true, \"duration\": 60}' https://masterly-api.the-nebula.tech/api/v1/internal/videos/2)",
+      "Bash(python3 -c \"\nimport json, base64\nfrom urllib.request import Request, urlopen\n\nurl = 'https://masterly-api.the-nebula.tech/api/v1/internal/videos/3'\nbody = json.dumps\\({'is_uploaded': True, 'duration': 60}\\).encode\\(\\)\ncred = base64.b64encode\\(b'admin:password'\\).decode\\(\\)\nreq = Request\\(url, data=body, method='PATCH'\\)\nreq.add_header\\('Authorization', f'Basic {cred}'\\)\nreq.add_header\\('Content-Type', 'application/json'\\)\nreq.add_header\\('Accept', 'application/json'\\)\nprint\\(f'URL: {req.full_url}'\\)\nprint\\(f'Method: {req.method}'\\)\nprint\\(f'Headers: {dict\\(req.headers\\)}'\\)\ntry:\n    with urlopen\\(req\\) as resp:\n        print\\(f'Status: {resp.status}'\\)\n        print\\(resp.read\\(\\).decode\\(\\)\\)\nexcept Exception as e:\n    print\\(f'Error: {e}'\\)\n    if hasattr\\(e, 'read'\\):\n        print\\(e.read\\(\\).decode\\(\\)\\)\n\" 2>&1)"
     ]
   }
 }

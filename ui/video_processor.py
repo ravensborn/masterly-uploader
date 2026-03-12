@@ -1,8 +1,10 @@
+import json
 import os
 import re
 import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.request import Request, urlopen
 
 import boto3
 from botocore.config import Config
@@ -45,12 +47,14 @@ def get_encoder_label() -> str:
 
 class ProcessingTask:
     def __init__(self, lesson_id: int, lesson_title: str, source_file: str,
-                 course_storage_path: str, qualities: list[str]):
+                 course_storage_path: str, qualities: list[str],
+                 video_ids: dict[str, int] | None = None):
         self.lesson_id = lesson_id
         self.lesson_title = lesson_title
         self.source_file = source_file
         self.course_storage_path = course_storage_path.rstrip("/")
         self.qualities = qualities  # e.g. ["1080p", "720p"]
+        self.video_ids = video_ids or {}  # quality -> video_id
 
 
 QUALITY_MAP = {
@@ -70,10 +74,12 @@ class ProcessingWorker(QThread):
     # overall done
     all_done = Signal()
 
-    def __init__(self, tasks: list[ProcessingTask], parent=None):
+    def __init__(self, tasks: list[ProcessingTask], api_base_url: str = "", api_auth_header: str = "", parent=None):
         super().__init__(parent)
         self.tasks = tasks
         self._cancelled = False
+        self._api_base_url = api_base_url.rstrip("/")
+        self._api_auth_header = api_auth_header
 
         self.s3 = boto3.client(
             "s3",
@@ -182,6 +188,20 @@ class ProcessingWorker(QThread):
         except OSError:
             pass
 
+        # 4. Update video upload status via API
+        video_id = task.video_ids.get(quality)
+        print(f"[DEBUG] Lesson {task.lesson_id} quality={quality} video_id={video_id} video_ids={task.video_ids}")
+        print(f"[DEBUG] api_base_url={self._api_base_url} auth_header={'set' if self._api_auth_header else 'empty'}")
+        if video_id and self._api_base_url and self._api_auth_header:
+            try:
+                self._patch_video(video_id, int(duration))
+                print(f"[DEBUG] PATCH success for video {video_id}")
+            except Exception as e:
+                print(f"[DEBUG] PATCH failed for video {video_id}: {e}")
+                self.task_error.emit(task_idx, quality, f"Upload OK but API update failed: {e}")
+        else:
+            print(f"[DEBUG] Skipping PATCH: video_id={video_id}, base_url={bool(self._api_base_url)}, auth={bool(self._api_auth_header)}")
+
         self.task_progress.emit(task_idx, quality, "done", 100)
 
     def _build_ffmpeg_cmd(self, source: str, height: int, output: str, use_gpu: bool = True) -> list[str]:
@@ -226,6 +246,17 @@ class ProcessingWorker(QThread):
         proc.wait()
         error_detail = "".join(stderr_lines[-10:]).strip()
         return (proc.returncode, error_detail)
+
+    def _patch_video(self, video_id: int, duration: int):
+        url = f"{self._api_base_url}/v1/internal/videos/{video_id}"
+        body = json.dumps({"is_uploaded": True, "duration": duration}).encode()
+        req = Request(url, data=body, method="POST")
+        req.add_header("Authorization", self._api_auth_header)
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Accept", "application/json")
+        req.add_header("User-Agent", "VideoCourseManager/1.0")
+        with urlopen(req) as resp:
+            resp.read()
 
     def _get_duration(self, filepath: str) -> float:
         try:
