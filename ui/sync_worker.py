@@ -7,6 +7,8 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from PySide6.QtCore import QThread, Signal
 
+from ui.logger import logger
+
 
 class SyncWorker(QThread):
     """Check R2 for existing video files and update the API for any that exist but aren't marked as uploaded."""
@@ -34,6 +36,7 @@ class SyncWorker(QThread):
         self.bucket = os.environ.get("R2_BUCKET_NAME", "")
 
     def run(self):
+        logger.info("Sync started")
         updated = 0
         skipped = 0
         missing = 0
@@ -66,14 +69,17 @@ class SyncWorker(QThread):
                         try:
                             self._update_video(video_id, int(duration))
                             self.progress.emit(lesson_title, quality, "updated")
+                            logger.info(f"Sync updated: video_id={video_id} lesson={lesson_id} quality={quality}")
                             updated += 1
                         except Exception as e:
                             self.progress.emit(lesson_title, quality, f"error: {e}")
+                            logger.error(f"Sync API update failed: video_id={video_id} lesson={lesson_id} quality={quality}: {e}")
                             errors += 1
                     else:
                         self.progress.emit(lesson_title, quality, "missing")
                         missing += 1
 
+        logger.info(f"Sync finished: {updated} updated, {skipped} skipped, {missing} missing, {errors} errors")
         self.finished_result.emit(updated, skipped, missing, errors)
 
     def _file_exists(self, key: str) -> bool:

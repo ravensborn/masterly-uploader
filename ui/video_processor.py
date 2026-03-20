@@ -7,6 +7,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.request import Request, urlopen
 
+from ui.logger import logger
+
 import boto3
 from botocore.config import Config
 from PySide6.QtCore import QObject, Signal, QThread
@@ -135,6 +137,8 @@ class ProcessingWorker(QThread):
         r2_key = f"{task.course_storage_path}/{task.lesson_id}_{quality}.mp4"
         filename = f"{task.lesson_id}_{quality}.mp4"
 
+        logger.info(f"Processing lesson {task.lesson_id} ({task.lesson_title}) quality={quality}")
+
         # 1. Encode with ffmpeg
         self.task_progress.emit(task_idx, quality, "encoding", 0)
         output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output")
@@ -151,13 +155,16 @@ class ProcessingWorker(QThread):
 
         # If GPU failed, retry with CPU
         if returncode != 0 and gpu_cmd != cpu_cmd:
+            logger.warning(f"GPU encoding failed for lesson {task.lesson_id} quality={quality}, falling back to CPU")
             self.encoder_fallback.emit()
             self.task_progress.emit(task_idx, quality, "encoding", 0)
             returncode, error_detail = self._run_ffmpeg(cpu_cmd, task_idx, quality, duration)
 
         if returncode != 0:
+            logger.error(f"Encoding failed for lesson {task.lesson_id} quality={quality}: exit code {returncode}\n{error_detail}")
             raise RuntimeError(f"ffmpeg exit code {returncode}:\n{error_detail}")
 
+        logger.info(f"Encoding complete for lesson {task.lesson_id} quality={quality}, duration={duration:.1f}s")
         self.task_progress.emit(task_idx, quality, "encoding", 100)
 
         if self._cancelled:
@@ -185,10 +192,16 @@ class ProcessingWorker(QThread):
                 pct = min(int(uploaded[0] / file_size * 100), 99)
                 self.task_progress.emit(task_idx, quality, "uploading", pct)
 
-        self.s3.upload_file(
-            output_path, self.bucket, r2_key,
-            Callback=upload_callback,
-        )
+        try:
+            self.s3.upload_file(
+                output_path, self.bucket, r2_key,
+                Callback=upload_callback,
+            )
+        except Exception as e:
+            logger.error(f"R2 upload failed for lesson {task.lesson_id} quality={quality} key={r2_key}: {e}")
+            raise
+
+        logger.info(f"Uploaded to R2: {r2_key} ({file_size} bytes)")
         self.task_progress.emit(task_idx, quality, "uploading", 100)
 
         # Cleanup converted file
@@ -199,19 +212,17 @@ class ProcessingWorker(QThread):
 
         # 4. Update video upload status via API (serialized per lesson to avoid race conditions)
         video_id = task.video_ids.get(quality)
-        print(f"[DEBUG] Lesson {task.lesson_id} quality={quality} video_id={video_id} video_ids={task.video_ids}")
-        print(f"[DEBUG] api_base_url={self._api_base_url} auth_header={'set' if self._api_auth_header else 'empty'}")
         if video_id and self._api_base_url and self._api_auth_header:
             with self._get_lesson_lock(task.lesson_id):
                 try:
                     self._update_video(video_id, int(duration))
-                    print(f"[DEBUG] PATCH success for video {video_id}")
+                    logger.info(f"API updated: video_id={video_id} lesson={task.lesson_id} quality={quality}")
                 except Exception as e:
-                    print(f"[DEBUG] PATCH failed for video {video_id}: {e}")
+                    logger.error(f"API update failed: video_id={video_id} lesson={task.lesson_id} quality={quality}: {e}")
                     self.task_error.emit(task_idx, quality, f"Upload OK but API update failed: {e}")
                     return
         else:
-            print(f"[DEBUG] Skipping PATCH: video_id={video_id}, base_url={bool(self._api_base_url)}, auth={bool(self._api_auth_header)}")
+            logger.warning(f"Skipping API update for lesson {task.lesson_id} quality={quality}: video_id={video_id}")
 
         self.task_progress.emit(task_idx, quality, "done", 100)
 
