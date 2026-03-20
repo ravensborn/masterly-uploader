@@ -1,7 +1,3 @@
-import subprocess
-import shutil
-import sys
-
 from PySide6.QtCore import Qt, Signal, QUrl
 from PySide6.QtGui import QCursor, QColor, QDesktopServices
 from PySide6.QtWidgets import (
@@ -531,16 +527,7 @@ class CourseDetailPage(QWidget):
 
     def _on_url_ready(self, url: str):
         self.status_label.hide()
-        if shutil.which("vlc"):
-            subprocess.Popen(["vlc", url])
-        elif shutil.which("mpv"):
-            subprocess.Popen(["mpv", url])
-        elif sys.platform == "linux":
-            subprocess.Popen(["xdg-open", url])
-        elif sys.platform == "darwin":
-            subprocess.Popen(["open", url])
-        else:
-            QDesktopServices.openUrl(QUrl(url))
+        QDesktopServices.openUrl(QUrl(url))
 
     def _on_r2_error(self, message: str):
         self.status_label.setText(f"Error: {message}")

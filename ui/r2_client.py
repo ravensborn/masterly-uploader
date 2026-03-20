@@ -19,7 +19,12 @@ class _PresignThread(QThread):
         try:
             url = self.s3_client.generate_presigned_url(
                 "get_object",
-                Params={"Bucket": self.bucket, "Key": self.key},
+                Params={
+                    "Bucket": self.bucket,
+                    "Key": self.key,
+                    "ResponseContentDisposition": "inline",
+                    "ResponseContentType": "video/mp4",
+                },
                 ExpiresIn=3600,
             )
             self.result.emit(url)
