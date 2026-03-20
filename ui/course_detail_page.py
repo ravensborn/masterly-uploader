@@ -7,7 +7,7 @@ from PySide6.QtGui import QCursor, QColor, QDesktopServices
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QScrollArea, QFrame, QPushButton, QGraphicsDropShadowEffect,
-    QCheckBox, QFileDialog,
+    QCheckBox, QFileDialog, QMenu,
 )
 
 from ui.r2_client import R2Client
@@ -156,26 +156,40 @@ class LessonItem(QFrame):
             q_label.setFixedHeight(22)
             layout.addWidget(q_label)
 
-        # Play button
-        play_btn = QPushButton("Play")
-        play_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        play_btn.setFixedSize(56, 28)
-        play_btn.setStyleSheet("""
+        # Play dropdown button
+        self.play_btn = QPushButton("Play \u25bc")
+        self.play_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.play_btn.setFixedSize(70, 28)
+        self.play_btn.setStyleSheet("""
             QPushButton {
                 background: #eff6ff; border: none; border-radius: 8px;
                 color: #2563eb; font-size: 11px; font-weight: 600;
             }
             QPushButton:hover { background: #dbeafe; }
+            QPushButton::menu-indicator { image: none; }
         """)
-        play_btn.clicked.connect(self._on_play)
-        play_btn.setVisible(len(self.videos) > 0)
-        layout.addWidget(play_btn)
-
-    def _on_play(self):
-        if not self.videos:
-            return
-        v = next((v for v in self.videos if v.get("quality") == "1080p"), self.videos[0])
-        self.play_requested.emit(v.get("storage_path", ""), v.get("file_path", ""))
+        self.play_menu = QMenu(self.play_btn)
+        self.play_menu.setStyleSheet("""
+            QMenu {
+                background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
+                padding: 4px 0;
+            }
+            QMenu::item {
+                padding: 6px 16px; font-size: 12px; color: #1e293b;
+            }
+            QMenu::item:selected {
+                background: #eff6ff; color: #2563eb;
+            }
+        """)
+        for v in self.videos:
+            quality = v.get("quality", "unknown")
+            action = self.play_menu.addAction(quality)
+            action.triggered.connect(lambda checked, vid=v: self.play_requested.emit(
+                vid.get("storage_path", ""), vid.get("file_path", "")
+            ))
+        self.play_btn.setMenu(self.play_menu)
+        self.play_btn.setVisible(len(self.videos) > 0)
+        layout.addWidget(self.play_btn)
 
     def is_checked(self):
         return self.checkbox.isChecked()

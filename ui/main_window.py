@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtWidgets import QMainWindow, QStackedWidget
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QVBoxLayout, QLabel, QWidget
 from PySide6.QtCore import QSize
 
 from ui.api_client import ApiClient
@@ -19,8 +19,23 @@ class MainWindow(QMainWindow):
         username = os.getenv("API_USERNAME", "admin")
         password = os.getenv("API_PASSWORD", "password")
         self.api_client = ApiClient(api_base, username=username, password=password, parent=self)
+
+        central = QWidget()
+        layout = QVBoxLayout(central)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        bucket = os.environ.get("R2_BUCKET_NAME", "—")
+        server_label = QLabel(f"  Server: {api_base}    Bucket: {bucket}")
+        server_label.setFixedHeight(28)
+        server_label.setStyleSheet(
+            "background: #1e293b; color: #94a3b8; font-size: 11px; font-weight: 600; padding: 0 12px;"
+        )
+        layout.addWidget(server_label)
+
         self.stack = QStackedWidget()
-        self.setCentralWidget(self.stack)
+        layout.addWidget(self.stack)
+        self.setCentralWidget(central)
 
         # Instructors page
         self.instructors_page = InstructorsPage(self.api_client, self)
