@@ -10,6 +10,7 @@ from ui.r2_client import R2Client
 from ui.video_processor import ProcessingTask
 from ui.process_dialog import ProcessDialog
 from ui.assign_dialog import AssignDialog
+from ui.sync_worker import SyncWorker
 
 BACK_BTN_STYLE = """
     QPushButton {
@@ -341,6 +342,20 @@ class CourseDetailPage(QWidget):
         header_row.addWidget(self.header)
         header_row.addStretch()
 
+        self.sync_btn = QPushButton("Sync Upload Status")
+        self.sync_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.sync_btn.setFixedHeight(38)
+        self.sync_btn.setStyleSheet("""
+            QPushButton {
+                background: #f8fafc; border: 1.5px solid #e2e8f0;
+                border-radius: 10px; color: #475569; font-size: 12px;
+                font-weight: 600; padding: 0 18px;
+            }
+            QPushButton:hover { background: #eff6ff; border-color: #93c5fd; color: #3b82f6; }
+        """)
+        self.sync_btn.clicked.connect(self._on_sync_clicked)
+        header_row.addWidget(self.sync_btn)
+
         layout.addLayout(header_row)
 
         layout.addSpacing(24)
@@ -436,7 +451,8 @@ class CourseDetailPage(QWidget):
 
         self._course_storage_path = data.get("storage_path", "")
 
-        lesson_groups = data.get("lesson_groups", [])
+        self._raw_lesson_groups = data.get("lesson_groups", [])
+        lesson_groups = self._raw_lesson_groups
         if not lesson_groups:
             self.status_label.setText("No lesson groups found.")
             self.status_label.show()
@@ -538,3 +554,53 @@ class CourseDetailPage(QWidget):
         self.status_label.setText(f"Error: {message}")
         self.status_label.show()
         self.status_label.setStyleSheet("font-size: 14px; color: #ef4444; padding: 60px 0; background: transparent;")
+
+    def _on_sync_clicked(self):
+        if not hasattr(self, '_raw_lesson_groups') or not self._raw_lesson_groups:
+            return
+
+        self.sync_btn.setEnabled(False)
+        self.sync_btn.setText("Syncing...")
+        self.sync_btn.setStyleSheet("""
+            QPushButton {
+                background: #eff6ff; border: 1.5px solid #93c5fd;
+                border-radius: 10px; color: #3b82f6; font-size: 12px;
+                font-weight: 600; padding: 0 18px;
+            }
+        """)
+
+        self._sync_worker = SyncWorker(
+            self._raw_lesson_groups,
+            self._course_storage_path,
+            self.api_client.base_url,
+            self.api_client._auth_header,
+            parent=self,
+        )
+        self._sync_worker.progress.connect(self._on_sync_progress)
+        self._sync_worker.finished_result.connect(self._on_sync_finished)
+        self._sync_worker.start()
+
+    def _on_sync_progress(self, lesson_title: str, quality: str, status: str):
+        self.sync_btn.setText(f"Syncing: {lesson_title} ({quality})")
+
+    def _on_sync_finished(self, updated: int, skipped: int, missing: int, errors: int):
+        self.sync_btn.setEnabled(True)
+        self.sync_btn.setText("Sync Upload Status")
+        self.sync_btn.setStyleSheet("""
+            QPushButton {
+                background: #f8fafc; border: 1.5px solid #e2e8f0;
+                border-radius: 10px; color: #475569; font-size: 12px;
+                font-weight: 600; padding: 0 18px;
+            }
+            QPushButton:hover { background: #eff6ff; border-color: #93c5fd; color: #3b82f6; }
+        """)
+
+        self.status_label.setText(
+            f"Sync complete: {updated} updated, {skipped} already OK, {missing} missing on R2, {errors} errors"
+        )
+        self.status_label.setStyleSheet("font-size: 14px; color: #059669; padding: 12px 0; background: transparent;")
+        self.status_label.show()
+
+        # Reload to reflect changes
+        if updated > 0:
+            self.load(self._current_course_id)
