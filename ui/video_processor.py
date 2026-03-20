@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.request import Request, urlopen
 
@@ -80,6 +81,8 @@ class ProcessingWorker(QThread):
         self._cancelled = False
         self._api_base_url = api_base_url.rstrip("/")
         self._api_auth_header = api_auth_header
+        self._api_locks: dict[int, threading.Lock] = {}  # per-lesson lock for API calls
+        self._api_locks_lock = threading.Lock()
 
         self.s3 = boto3.client(
             "s3",
@@ -93,6 +96,12 @@ class ProcessingWorker(QThread):
 
     def cancel(self):
         self._cancelled = True
+
+    def _get_lesson_lock(self, lesson_id: int) -> threading.Lock:
+        with self._api_locks_lock:
+            if lesson_id not in self._api_locks:
+                self._api_locks[lesson_id] = threading.Lock()
+            return self._api_locks[lesson_id]
 
     def run(self):
         # Build all jobs: (task_idx, task, quality)
@@ -188,17 +197,19 @@ class ProcessingWorker(QThread):
         except OSError:
             pass
 
-        # 4. Update video upload status via API
+        # 4. Update video upload status via API (serialized per lesson to avoid race conditions)
         video_id = task.video_ids.get(quality)
         print(f"[DEBUG] Lesson {task.lesson_id} quality={quality} video_id={video_id} video_ids={task.video_ids}")
         print(f"[DEBUG] api_base_url={self._api_base_url} auth_header={'set' if self._api_auth_header else 'empty'}")
         if video_id and self._api_base_url and self._api_auth_header:
-            try:
-                self._patch_video(video_id, int(duration))
-                print(f"[DEBUG] PATCH success for video {video_id}")
-            except Exception as e:
-                print(f"[DEBUG] PATCH failed for video {video_id}: {e}")
-                self.task_error.emit(task_idx, quality, f"Upload OK but API update failed: {e}")
+            with self._get_lesson_lock(task.lesson_id):
+                try:
+                    self._update_video(video_id, int(duration))
+                    print(f"[DEBUG] PATCH success for video {video_id}")
+                except Exception as e:
+                    print(f"[DEBUG] PATCH failed for video {video_id}: {e}")
+                    self.task_error.emit(task_idx, quality, f"Upload OK but API update failed: {e}")
+                    return
         else:
             print(f"[DEBUG] Skipping PATCH: video_id={video_id}, base_url={bool(self._api_base_url)}, auth={bool(self._api_auth_header)}")
 
@@ -247,7 +258,7 @@ class ProcessingWorker(QThread):
         error_detail = "".join(stderr_lines[-10:]).strip()
         return (proc.returncode, error_detail)
 
-    def _patch_video(self, video_id: int, duration: int):
+    def _update_video(self, video_id: int, duration: int):
         url = f"{self._api_base_url}/v1/internal/videos/{video_id}"
         body = json.dumps({"is_uploaded": True, "duration": duration}).encode()
         req = Request(url, data=body, method="POST")
